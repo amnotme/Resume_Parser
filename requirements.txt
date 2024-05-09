@@ -1,0 +1,8 @@
+Flask
+numpy
+pandas
+scikit-learn
+nltk
+spacy
+en-core-web-sm
+gunicorn
