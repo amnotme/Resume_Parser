@@ -14,7 +14,8 @@ pandas="*"
 scikit-learn="*"
 nltk="*"
 spacy="*"
-#en-core-web-sm="*"
+# en-core-web-sm="*" Installed directly with python3 -m spacy download en_core_web_sm
+# no package manager for spacy with en_core_web_sm
 gunicorn="*"
 
 [dev-packages]
