@@ -28,7 +28,7 @@ def handle_upload():
         return jsonify({"error": "No selected file"}), 400
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        filepath = os.path.join(request.app.config["UPLOAD_FOLDER"], filename)
+        filepath = os.path.join(os.getenv('UPLOAD_FOLDER', '/tmp'), filename)
         file.save(filepath)
         text = extract_text_from_pdf(filepath)
         cleaned_text = clean_text(text)
