@@ -1,10 +1,12 @@
 from flask import Flask
+from app.routes.routes import resume_bp
+
 
 def create_app():
     app = Flask(__name__)
-    # Additional configuration can be loaded here
+    app.config["UPLOAD_FOLDER"] = "resume_parser_data"
+    app.config["ALLOWED_EXTENSIONS"] = {"pdf", "txt"}
 
-    from .routes.resume_routes import resume_bp
-    app.register_blueprint(resume_bp)
+    app.register_blueprint(resume_bp, url_prefix="/resume")
 
     return app
