@@ -160,3 +160,6 @@ cython_debug/
 .idea/
 Pipfile.lock
 uploaded_resumes/*
+
+resume_parser_data/.DS_Store
+.DS_Store

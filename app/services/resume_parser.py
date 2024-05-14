@@ -3,8 +3,17 @@ import re
 
 
 def clean_text(text):
-    text = re.sub(r"[\r\n]+", " ", text)
-    text = re.sub(r"\s{2,}", " ", text)
+    # Normalize common unicode characters
+    text = text.replace('â€‹', '').replace('Â', '').replace('ï¼​', '').replace('â—​', '')
+    # Replace multiple spaces with a single space
+    text = re.sub(r'\s+', ' ', text)
+    # Remove specific unwanted characters
+    text = re.sub(r'[\r\n\t]', ' ', text)
+    # Replace unicode bullet points and other non-standard punctuation
+    text = text.replace('\u2022', '')  # Bullet points
+    text = text.replace('\uf0b7', '')  # Another type of bullet
+    # Optionally remove any characters that are not standard printable characters
+    text = re.sub(r'[^\x00-\x7F]+', ' ', text)  # Removes non-ASCII characters
     return text.strip()
 
 
@@ -16,14 +25,16 @@ def extract_text_from_pdf(pdf_path):
             full_text += page.extract_text() + "\n"
     return full_text
 
-
 def extract_sections(text):
     sections = {}
+    # Updated regex pattern to be more robust and flexible
     pattern = re.compile(
-        r"(Summary|Highlights|Accomplishments|Experience)\s*:\s*(.*?)(?=(Summary|Highlights|Accomplishments|Experience)\s*:\s*|$)",
-        re.I | re.S,
+        r"(Summary|Highlights|Accomplishments|Experience|Education|Skills)\s*[:\-]?\s*(.*?)(?=\n*(Summary|Highlights|Accomplishments|Experience|Education|Skills)\s*[:\-]?\s*|$)",
+        re.I | re.DOTALL
     )
     matches = pattern.finditer(text)
     for match in matches:
-        sections[match.group(1)] = match.group(2).strip()
+        # Clean up the section text by removing excessive whitespace
+        section_text = ' '.join(match.group(2).strip().split())
+        sections[match.group(1)] = section_text
     return sections
