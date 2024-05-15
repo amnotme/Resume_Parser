@@ -42,20 +42,3 @@ def extract_sections(text):
             sections[section_title] = match.group(2).strip()
     return sections
 
-
-# This might need to replace it.
-# def extract_sections(text):
-#     sections = {}
-#     pattern = re.compile(
-#         r'(Summary|Highlights|Accomplishments|Experience|Education|Skills|Objective|Professional Summary|Technical Skills|Certifications|Licenses|Projects|Professional Experience|Work History|Education and Training|Publications|Research|Awards|Honors|Volunteer Work|Community Service)\s*[:\-]?\s*(.*?)(?=(Summary|Highlights|Accomplishments|Experience|Education|Skills|Objective|Professional Summary|Technical Skills|Certifications|Licenses|Projects|Professional Experience|Work History|Education and Training|Publications|Research|Awards|Honors|Volunteer Work|Community Service)\s*[:\-]?\s*|$)',
-#         re.I | re.S
-#     )
-#     matches = pattern.finditer(text)
-#     for match in matches:
-#         section_title = match.group(1).lower()  # Normalize the key to lowercase
-#         if section_title in sections:
-#             # Append new content with a newline for readability if the section already exists
-#             sections[section_title] += match.group(2).strip()
-#         else:
-#             sections[section_title] = match.group(2).strip()
-#     return sections
