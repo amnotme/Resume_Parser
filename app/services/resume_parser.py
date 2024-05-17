@@ -46,7 +46,6 @@ def extract_sections(text):
     return sections
 
 def preprocess_text(text):
-    # Lowercase text
     text = text.lower()
     # Tokenization, removing punctuation, stopwords, etc.
     doc = nlp(text)
