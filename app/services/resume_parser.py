@@ -1,10 +1,13 @@
 import PyPDF2
 import re
 import spacy
+import os
 
 nlp = spacy.load('en_core_web_sm')
 
-
+data_dir = 'resume_parser_data'
+output_dir_train = 'train_texts'
+output_dir_parsed = 'parsed_pdfs'
 def clean_text(text):
     # Normalize common unicode characters
     text = text.replace('â€‹', '').replace('Â', '').replace('ï¼​', '').replace('â—​', '')
@@ -50,3 +53,39 @@ def preprocess_text(text):
     doc = nlp(text)
     tokens = [token.lemma_ for token in doc if not token.is_stop and not token.is_punct]
     return ' '.join(tokens)
+
+
+def save_text(job_type, text, output_dir, count):
+    filename = f"{job_type}-{count}.txt"
+    filepath = os.path.join(output_dir, filename)
+    with open(filepath, 'w') as f:
+        f.write(text)
+
+
+def process_resumes(data_dir, output_dir_train, output_dir_parsed):
+    count_dict = {}
+    for root, dirs, files in os.walk(data_dir):
+        for file in files:
+            if file.endswith('.pdf'):
+                job_type = os.path.basename(root)
+                pdf_path = os.path.join(root, file)
+                text = extract_text_from_pdf(pdf_path)
+                cleaned_text = clean_text(text)
+                preprocessed_text = preprocess_text(cleaned_text)
+
+                # Increment count for job type
+                if job_type not in count_dict:
+                    count_dict[job_type] = 0
+                count_dict[job_type] += 1
+
+                # Save text
+                save_text(job_type, preprocessed_text, output_dir_train, count_dict[job_type])
+                save_text(job_type, cleaned_text, output_dir_parsed, count_dict[job_type])
+
+
+
+# Create output directories if they don't exist
+os.makedirs(output_dir_train, exist_ok=True)
+os.makedirs(output_dir_parsed, exist_ok=True)
+
+process_resumes(data_dir, output_dir_train, output_dir_parsed)
