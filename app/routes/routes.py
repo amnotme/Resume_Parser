@@ -5,6 +5,7 @@ from app.services.resume_parser import (
     extract_text_from_pdf,
     extract_sections,
     clean_text,
+    preprocess_text
 )
 
 resume_bp = Blueprint("resume_bp", __name__)
@@ -32,7 +33,9 @@ def handle_upload():
         file.save(filepath)
         text = extract_text_from_pdf(filepath)
         cleaned_text = clean_text(text)
-        sections = extract_sections(cleaned_text)
+        preprocessed_text = preprocess_text(cleaned_text)
+        sections = extract_sections(preprocessed_text)
+        # sections = extract_sections(cleaned_text)
         return jsonify(sections)
     else:
         return jsonify({"error": "File not allowed"}), 400
