@@ -84,7 +84,6 @@ def process_resumes(data_dir, output_dir_train, output_dir_parsed):
 
 
 
-# Create output directories if they don't exist
 os.makedirs(output_dir_train, exist_ok=True)
 os.makedirs(output_dir_parsed, exist_ok=True)
 
