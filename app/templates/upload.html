@@ -1,13 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Upload File</title>
+    <title>Resume Parser</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Upload new File</h1>
-    <form action="/resume/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file">
-        <input type="submit" value="Upload">
-    </form>
+    <div class="container">
+        <h1>Resume Parser</h1>
+
+        <div class="section">
+            <h2>Process Data</h2>
+            <form id="process-form" action="/resume/process" method="post">
+                <button type="submit">Process</button>
+            </form>
+        </div>
+
+        <div class="section">
+            <h2>Upload New File</h2>
+            <form id="upload-form" action="/resume/upload" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" id="file-input">
+                <button type="submit">Upload</button>
+            </form>
+            <div id="upload-status"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>
 </html>

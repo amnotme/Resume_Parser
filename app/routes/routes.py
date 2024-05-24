@@ -5,10 +5,15 @@ from app.services.resume_parser import (
     extract_text_from_pdf,
     extract_sections,
     clean_text,
-    preprocess_text
+    preprocess_text,
+    process_resumes,
 )
 
 resume_bp = Blueprint("resume_bp", __name__)
+
+data_dir = "resume_parser_data"
+output_dir_train = "train_texts"
+output_dir_parsed = "parsed_pdfs"
 
 
 def allowed_file(filename):
@@ -29,7 +34,7 @@ def handle_upload():
         return jsonify({"error": "No selected file"}), 400
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        filepath = os.path.join(os.getenv('UPLOAD_FOLDER', '/tmp'), filename)
+        filepath = os.path.join(os.getenv("UPLOAD_FOLDER", "/tmp"), filename)
         file.save(filepath)
         text = extract_text_from_pdf(filepath)
         cleaned_text = clean_text(text)
@@ -39,3 +44,11 @@ def handle_upload():
         return jsonify(sections)
     else:
         return jsonify({"error": "File not allowed"}), 400
+
+
+@resume_bp.route("/process", methods=["POST"])
+def process_data():
+    os.makedirs(output_dir_train, exist_ok=True)
+    os.makedirs(output_dir_parsed, exist_ok=True)
+
+    process_resumes(data_dir, output_dir_train, output_dir_parsed)
