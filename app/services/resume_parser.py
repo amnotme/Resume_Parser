@@ -87,6 +87,3 @@ def process_resumes(data_dir, output_dir_train, output_dir_parsed):
                     job_type, preprocessed_text, output_dir_train, count_dict[job_type]
                 )
                 print(f"processed {job_type}-{count_dict[job_type]}!")
-                # save_text(
-                #     job_type, cleaned_text, output_dir_parsed, count_dict[job_type]
-                # )
