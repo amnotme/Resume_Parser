@@ -1,55 +1,14 @@
-import PyPDF2
-import re
+from app.utilities import clean_text, extract_text_from_pdf
+
 import spacy
 import os
+
 
 nlp = spacy.load("en_core_web_sm")
 
 data_dir = "resume_parser_data"
 output_dir_train = "train_texts"
 output_dir_parsed = "parsed_pdfs"
-
-
-def clean_text(text):
-    # Normalize common unicode characters
-    text = text.replace("â€‹", "").replace("Â", "").replace("ï¼​", "").replace("â—​", "")
-    # Replace multiple spaces with a single space
-    text = re.sub(r"\s+", " ", text)
-    # Remove specific unwanted characters
-    text = re.sub(r"[\r\n\t]", " ", text)
-    # Replace unicode bullet points and other non-standard punctuation
-    text = text.replace("\u2022", "")  # Bullet points
-    text = text.replace("\uf0b7", "")  # Another type of bullet
-    # Optionally remove any characters that are not standard printable characters
-    text = re.sub(r"[^\x00-\x7F]+", " ", text)  # Removes non-ASCII characters
-    return text.strip()
-
-
-def extract_text_from_pdf(pdf_path):
-    with open(pdf_path, "rb") as file:
-        pdf_reader = PyPDF2.PdfReader(file)
-        full_text = ""
-        for page in pdf_reader.pages:
-            full_text += page.extract_text() + "\n"
-    return full_text
-
-
-def extract_sections(text):
-    sections = {}
-    # Updated regex pattern to be more robust and flexible
-    pattern = re.compile(
-        r"(Summary|Highlights|Accomplishments|Experience|Education|Skills)\s*[:\-]?\s*(.*?)(?=\n*(Summary|Highlights|Accomplishments|Experience|Education|Skills)\s*[:\-]?\s*|$)",
-        re.I | re.DOTALL,
-    )
-    matches = pattern.finditer(text)
-    for match in matches:
-        section_title = match.group(1).lower()  # Normalize the key to lowercase
-        if section_title in sections:
-            # Append new content with a newline for readability if the section already exists
-            sections[section_title] += match.group(2).strip()
-        else:
-            sections[section_title] = match.group(2).strip()
-    return sections
 
 
 def preprocess_text(text):
@@ -59,7 +18,7 @@ def preprocess_text(text):
     return " ".join(tokens)
 
 
-def save_text(job_type, text, output_dir, count):
+def save_text_to_file(job_type, text, output_dir, count):
     filename = f"{job_type}-{count}.txt"
     filepath = os.path.join(output_dir, filename)
     with open(filepath, "w") as f:
@@ -82,7 +41,7 @@ def process_resumes(data_dir, output_dir_train, output_dir_parsed):
                     count_dict[job_type] = 0
                 count_dict[job_type] += 1
 
-                save_text(
+                save_text_to_file(
                     job_type, preprocessed_text, output_dir_train, count_dict[job_type]
                 )
                 print(f"processed {job_type}-{count_dict[job_type]}!")

@@ -2,12 +2,11 @@ import os
 from flask import Blueprint, request, jsonify, render_template
 from werkzeug.utils import secure_filename
 from app.services.resume_parser import (
-    extract_text_from_pdf,
-    extract_sections,
-    clean_text,
     preprocess_text,
     process_resumes,
 )
+from app.utilities import extract_sections, extract_text_from_pdf, clean_text
+
 
 resume_bp = Blueprint("resume_bp", __name__)
 

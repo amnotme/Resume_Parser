@@ -48,6 +48,25 @@ button:hover {
     background-color: #0056b3;
 }
 
+button[disabled] {
+    cursor: not-allowed;
+}
+
+button[disabled]:hover::after {
+    content: "Admin only";
+    color: #fff;
+    background-color: #000;
+    padding: 4px 8px;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    white-space: nowrap;
+}
+
+button[disabled]:hover {
+    position: relative;
+}
+
 #upload-status {
     margin-top: 10px;
     font-size: 14px;
