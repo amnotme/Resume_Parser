@@ -24,3 +24,29 @@ document.getElementById('upload-form').addEventListener('submit', function(event
         uploadStatus.style.color = 'red';
     });
 });
+
+document.getElementById('train-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const trainStatus = document.getElementById('train-status');
+
+    fetch('/resume/train', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        trainStatus.style.display = 'block';
+        if (data.error) {
+            trainStatus.textContent = data.error;
+            trainStatus.style.color = 'red';
+        } else {
+            trainStatus.textContent = 'Model trained successfully! \n' + data.report; // Assuming server sends a summary report
+            trainStatus.style.color = 'green';
+        }
+    })
+    .catch(error => {
+        trainStatus.style.display = 'block';
+        trainStatus.textContent = 'An error occurred during training!';
+        trainStatus.style.color = 'red';
+    });
+});

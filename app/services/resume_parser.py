@@ -1,14 +1,14 @@
-from app.utilities import clean_text, extract_text_from_pdf
-
 import spacy
 import os
+from os import getenv
+from app.utilities import clean_text, extract_text_from_pdf
 
 
 nlp = spacy.load("en_core_web_sm")
 
-data_dir = "resume_parser_data"
-output_dir_train = "train_texts"
-output_dir_parsed = "parsed_pdfs"
+data_dir = getenv("RESUME_DATA_FOLDER", "tmp1")
+output_dir_train = getenv("TRAINED_DATA_FOLDER", "tmp2")
+output_dir_parsed = getenv("PARSED_PDFS_FOLDER", "tmp3")
 
 
 def preprocess_text(text):

@@ -1,18 +1,20 @@
 import os
+from os import getenv
 from flask import Blueprint, request, jsonify, render_template
 from werkzeug.utils import secure_filename
 from app.services.resume_parser import (
     preprocess_text,
     process_resumes,
 )
+from app.services.model_training import train_model
 from app.utilities import extract_sections, extract_text_from_pdf, clean_text
 
 
 resume_bp = Blueprint("resume_bp", __name__)
 
-data_dir = "resume_parser_data"
-output_dir_train = "train_texts"
-output_dir_parsed = "parsed_pdfs"
+data_dir = getenv("RESUME_DATA_FOLDER", "tmp1")
+output_dir_train = getenv("TRAINED_DATA_FOLDER", "tmp2")
+output_dir_parsed = getenv("PARSED_PDFS_FOLDER", "tmp3")
 
 
 def allowed_file(filename):
@@ -51,3 +53,9 @@ def process_data():
     os.makedirs(output_dir_parsed, exist_ok=True)
 
     process_resumes(data_dir, output_dir_train, output_dir_parsed)
+
+
+@resume_bp.route("/train", methods=["POST"])
+def train_data():
+    report = train_model(print_predictions=True, limit_run=False)
+    return jsonify({"message": "Model trained successfully!", "report": report})
