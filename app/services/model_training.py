@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.model_selection import cross_val_predict
 
 
 def load_data(directory, limit_run=True):
@@ -51,14 +52,19 @@ def train_model(print_predictions=False, limit_run=True):
     X_test_tfidf = vectorizer.transform(X_test)
 
     # Model
-    model = LogisticRegression(multi_class="ovr")  # 'ovr' for one-vs-rest strategy
+    model = LogisticRegression(
+        multi_class="ovr", class_weight="balanced"
+    )  # 'ovr' for one-vs-rest strategy
     model.fit(X_train_tfidf, y_train)
 
     # Predictions
-    predictions = model.predict(X_test_tfidf)
-    report = classification_report(y_test, predictions)
+    # predictions = model.predict(X_test_tfidf)
+
+    # Cross-validate and predict
+    predictions = cross_val_predict(model, X_train_tfidf, y_train, cv=5)
+    report = classification_report(y_train, predictions, zero_division=0)
     if print_predictions:
         # Evaluation
         print(report)
-        print(confusion_matrix(y_test, predictions))
+        print(confusion_matrix(y_train, predictions))
     return report
