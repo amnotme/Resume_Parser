@@ -6,7 +6,6 @@ name = 'pypi'
 [requires]
 python_version = '3.10'
 
-
 [packages]
 Flask="*"
 numpy="*"
@@ -19,5 +18,7 @@ PyPDF2="*"
 # no package manager for spacy with en_core_web_sm
 gunicorn="*"
 python-dotenv="*"
+imblearn = "*"
+matplotlib = "*"
 
 [dev-packages]

@@ -1,2 +1,5 @@
 from app.services.model_training import load_data
-from app.services.model_training import train_model
+from app.services.model_training import train_model_with_smote
+from app.services.model_training import train_model_with_svc
+from app.services.model_training import train_model_with_svd
+from app.services.model_training import train_model_with_random_forest

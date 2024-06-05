@@ -6,7 +6,12 @@ from app.services.resume_parser import (
     preprocess_text,
     process_resumes,
 )
-from app.services.model_training import train_model
+from app.services.model_training import (
+    train_model_with_smote,
+    train_model_with_svc,
+    train_model_with_svd,
+    train_model_with_random_forest
+)
 from app.utilities import extract_sections, extract_text_from_pdf, clean_text
 
 
@@ -57,5 +62,6 @@ def process_data():
 
 @resume_bp.route("/train", methods=["POST"])
 def train_data():
-    report = train_model(print_predictions=True, limit_run=False)
+    # report = train_model_with_smote(print_predictions=True, limit_run=False)
+    report = train_model_with_random_forest(print_predictions=True, limit_run=False)
     return jsonify({"message": "Model trained successfully!", "report": report})
