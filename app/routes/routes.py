@@ -10,7 +10,8 @@ from app.services.model_training import (
     train_model_with_smote,
     train_model_with_svc,
     train_model_with_svd,
-    train_model_with_random_forest
+    train_model_with_random_forest,
+    train_stacked_classifier,
 )
 from app.utilities import extract_sections, extract_text_from_pdf, clean_text
 
@@ -63,5 +64,5 @@ def process_data():
 @resume_bp.route("/train", methods=["POST"])
 def train_data():
     # report = train_model_with_smote(print_predictions=True, limit_run=False)
-    report = train_model_with_random_forest(print_predictions=True, limit_run=False)
+    report = train_stacked_classifier(print_predictions=True, limit_run=False)
     return jsonify({"message": "Model trained successfully!", "report": report})
