@@ -85,6 +85,7 @@ def train_model_with_svd(print_predictions=False, limit_run=True):
         print(classification_report(y_test, predictions))
         print(confusion_matrix(y_test, predictions))
 
+
 def train_model_with_svc(print_predictions=False, limit_run=True):
     # Load your data
     texts, labels = load_data(getenv("TRAINED_DATA_FOLDER"), limit_run=limit_run)
@@ -139,7 +140,6 @@ def train_model_with_smote(print_predictions=False, limit_run=True):
     if print_predictions:
         print(classification_report(y_test, predictions, zero_division=0))
         print(confusion_matrix(y_test, predictions))
-
 
 
 def train_model_with_random_forest(print_predictions=False, limit_run=True):
