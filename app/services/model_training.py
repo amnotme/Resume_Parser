@@ -85,10 +85,6 @@ def train_model_with_svd(print_predictions=False, limit_run=True):
         print(classification_report(y_test, predictions))
         print(confusion_matrix(y_test, predictions))
 
-    # return pipeline
-
-
-#
 def train_model_with_svc(print_predictions=False, limit_run=True):
     # Load your data
     texts, labels = load_data(getenv("TRAINED_DATA_FOLDER"), limit_run=limit_run)
@@ -117,7 +113,6 @@ def train_model_with_svc(print_predictions=False, limit_run=True):
         print(report)
         print(confusion_matrix(y_train, predictions))
 
-    # return model, vectorizer
     return report
 
 
@@ -145,7 +140,6 @@ def train_model_with_smote(print_predictions=False, limit_run=True):
         print(classification_report(y_test, predictions, zero_division=0))
         print(confusion_matrix(y_test, predictions))
 
-    # return pipeline
 
 
 def train_model_with_random_forest(print_predictions=False, limit_run=True):
@@ -182,12 +176,11 @@ def train_model_with_random_forest(print_predictions=False, limit_run=True):
         print(confusion_matrix(y_test, predictions))
 
     plot_feature_importances_save_file(clf.steps[1][1], clf.steps[0][1])
-# return clf
 
 
 def train_stacked_classifier(print_predictions=False, limit_run=True):
 
-    print(f'begin training with: {__name__}')
+    print(f"begin training with: {__name__}")
     # Load your data
     texts, labels = load_data(getenv("TRAINED_DATA_FOLDER"), limit_run)
 
@@ -201,7 +194,12 @@ def train_stacked_classifier(print_predictions=False, limit_run=True):
     X_test_tfidf = vectorizer.transform(X_test)
 
     base_learners = [
-        ("rf", RandomForestClassifier(n_estimators=200, max_depth=20, random_state=42, class_weight="balanced")),
+        (
+            "rf",
+            RandomForestClassifier(
+                n_estimators=200, max_depth=20, random_state=42, class_weight="balanced"
+            ),
+        ),
         ("svc", SVC(kernel="linear", probability=True)),
         ("dt", DecisionTreeClassifier(max_depth=20, random_state=42)),
     ]
@@ -216,10 +214,13 @@ def train_stacked_classifier(print_predictions=False, limit_run=True):
         print(confusion_matrix(y_test, predictions))
 
     # Assuming RandomForest is the first model in the base_learners
-    rf_model = stacked_model.named_estimators_['rf']
+    rf_model = stacked_model.named_estimators_["rf"]
     plot_feature_importances_save_file(rf_model, vectorizer)
 
-def plot_feature_importances_save_file(model, vectorizer, n_features=20, file_name="feature_importances.png"):
+
+def plot_feature_importances_save_file(
+    model, vectorizer, n_features=20, file_name="feature_importances.png"
+):
     if hasattr(model, "feature_importances_"):
         importances = model.feature_importances_
         feature_names = vectorizer.get_feature_names_out()
@@ -229,13 +230,23 @@ def plot_feature_importances_save_file(model, vectorizer, n_features=20, file_na
 
         plt.figure(figsize=(10, 8))
         plt.title("Top Feature Importances", fontsize=16)
-        bars = plt.barh(range(n_features), sorted_importances, align='center', color='skyblue')
+        bars = plt.barh(
+            range(n_features), sorted_importances, align="center", color="skyblue"
+        )
         plt.yticks(range(n_features), sorted_feature_names, fontsize=12)
         plt.xlabel("Relative Importance", fontsize=14)
         plt.ylabel("Features", fontsize=14)
 
         for bar in bars:
-            plt.text(bar.get_width(), bar.get_y() + bar.get_height() / 2, f"{bar.get_width():.4f}", va='center', ha='left', fontsize=10, color='blue')
+            plt.text(
+                bar.get_width(),
+                bar.get_y() + bar.get_height() / 2,
+                f"{bar.get_width():.4f}",
+                va="center",
+                ha="left",
+                fontsize=10,
+                color="blue",
+            )
 
         plt.tight_layout()
         plt.savefig(file_name)
