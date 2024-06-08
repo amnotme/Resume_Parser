@@ -20,5 +20,7 @@ gunicorn="*"
 python-dotenv="*"
 imblearn = "*"
 matplotlib = "*"
+gensim = "*"
+xgboost = "*"
 
 [dev-packages]

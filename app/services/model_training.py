@@ -2,17 +2,6 @@ import os
 from os import getenv
 
 from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.model_selection import cross_val_predict
-from sklearn.decomposition import TruncatedSVD
-from sklearn.preprocessing import Normalizer
-from imblearn.over_sampling import SMOTE
-from sklearn.pipeline import Pipeline
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split
-from imblearn.pipeline import make_pipeline
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.pipeline import make_pipeline
-import numpy as np
 import matplotlib
 
 matplotlib.use("Agg")
@@ -21,6 +10,16 @@ from sklearn.ensemble import StackingClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestClassifier, StackingClassifier
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split, GridSearchCV
+from xgboost import XGBClassifier
+from sklearn.pipeline import Pipeline
+import numpy as np
+from gensim.models import Word2Vec
 
 
 def load_data(directory, limit_run=True):
