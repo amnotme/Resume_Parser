@@ -101,29 +101,30 @@ def train_stacked_classifier_with_word2vec(print_predictions=False, limit_run=Tr
     X_train_tokenized = [word_tokenize(text.lower()) for text in X_train]
     X_test_tokenized = [word_tokenize(text.lower()) for text in X_test]
 
-    # Train Word2Vec model
-    vectorizer = Word2Vec(
-        sentences=X_train_tokenized, vector_size=100, window=5, min_count=5, workers=4
-    )
+    # Create and train the TF-IDF vectorizer
+    tfidf_vectorizer = TfidfVectorizer(max_features=10000, ngram_range=(1, 3), min_df=3, max_df=0.85)
+    X_train_tfidf = tfidf_vectorizer.fit_transform(X_train)
+    X_test_tfidf = tfidf_vectorizer.transform(X_test)
 
-    # Function to convert texts to vector
-    def texts_to_vector(texts_tokenized):
+    # Create and train Word2Vec model
+    word2vec_model = Word2Vec(sentences=X_train_tokenized, vector_size=100, window=5, min_count=5, workers=4)
+
+    # Function to weight Word2Vec vectors by TF-IDF
+    def vectorize_text(data_tokenized, data_tfidf, model):
+        tfidf_vocab = tfidf_vectorizer.vocabulary_
         vectors = []
-        for tokens in texts_tokenized:
-            vector = [
-                vectorizer.wv[word]
-                for word in tokens
-                if word in vectorizer.wv.key_to_index
-            ]
-            if vector:
-                vectors.append(np.mean(vector, axis=0))
+        for tokens, tfidf_row in zip(data_tokenized, data_tfidf):
+            weights = [(model.wv[token] * tfidf_row[0, tfidf_vocab[token]])
+                       for token in tokens if token in model.wv.key_to_index and token in tfidf_vocab]
+            if weights:
+                vectors.append(np.mean(weights, axis=0))
             else:
-                # Append a zero vector if no words matched the Word2Vec model
-                vectors.append(np.zeros(vectorizer.vector_size))
+                vectors.append(np.zeros(model.vector_size))
         return np.array(vectors)
 
-    X_train_vectors = texts_to_vector(X_train_tokenized)
-    X_test_vectors = texts_to_vector(X_test_tokenized)
+    # Transform text data to vector data
+    X_train_vectors = vectorize_text(X_train_tokenized, X_train_tfidf, word2vec_model)
+    X_test_vectors = vectorize_text(X_test_tokenized, X_test_tfidf, word2vec_model)
 
     # Define base learners
     base_learners = [
@@ -140,7 +141,7 @@ def train_stacked_classifier_with_word2vec(print_predictions=False, limit_run=Tr
         estimators=base_learners, final_estimator=meta_learner, cv=5
     )
 
-    # Train the stacked model
+    # Train the model
     stacked_model.fit(X_train_vectors, y_train)
 
     # Predictions and evaluation
@@ -148,9 +149,6 @@ def train_stacked_classifier_with_word2vec(print_predictions=False, limit_run=Tr
     if print_predictions:
         print(classification_report(y_test, predictions))
         print(confusion_matrix(y_test, predictions))
-
-    # return stacked_model  # Optionally return the model
-
 
 def plot_feature_importances_save_file(
     model, vectorizer, n_features=20, file_name="feature_importances.png"
