@@ -101,26 +101,48 @@ def train_stacked_classifier_with_word2vec(print_predictions=False, limit_run=Tr
     X_test_tokenized = [word_tokenize(text.lower()) for text in X_test]
 
     # Create and train Word2Vec model
-    vectorizer = Word2Vec(sentences=X_train_tokenized, vector_size=100, window=5, min_count=5, workers=4)
+    vectorizer = Word2Vec(
+        sentences=X_train_tokenized, vector_size=100, window=5, min_count=5, workers=4
+    )
 
     # Transform text data to vector data
-    X_train_vectors = [np.mean([vectorizer.wv[word] for word in words if word in vectorizer.wv.key_to_index], axis=0)
-                       for words in X_train_tokenized]
-    X_test_vectors = [np.mean([vectorizer.wv[word] for word in words if word in vectorizer.wv.key_to_index], axis=0) for
-                      words in X_test_tokenized]
+    X_train_vectors = [
+        np.mean(
+            [
+                vectorizer.wv[word]
+                for word in words
+                if word in vectorizer.wv.key_to_index
+            ],
+            axis=0,
+        )
+        for words in X_train_tokenized
+    ]
+    X_test_vectors = [
+        np.mean(
+            [
+                vectorizer.wv[word]
+                for word in words
+                if word in vectorizer.wv.key_to_index
+            ],
+            axis=0,
+        )
+        for words in X_test_tokenized
+    ]
 
     # Define base learners
     base_learners = [
         ("rf", RandomForestClassifier(n_estimators=100, max_depth=20, random_state=42)),
         ("svc", SVC(kernel="linear", probability=True)),
-        ("dt", DecisionTreeClassifier(max_depth=10, random_state=42))
+        ("dt", DecisionTreeClassifier(max_depth=10, random_state=42)),
     ]
 
     # Meta-learner
     meta_learner = LogisticRegression(random_state=42)
 
     # Stacking Classifier
-    stacked_model = StackingClassifier(estimators=base_learners, final_estimator=meta_learner, cv=5)
+    stacked_model = StackingClassifier(
+        estimators=base_learners, final_estimator=meta_learner, cv=5
+    )
 
     # Train the model
     stacked_model.fit(np.array(X_train_vectors), y_train)
