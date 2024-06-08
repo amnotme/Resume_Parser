@@ -23,6 +23,6 @@ matplotlib = "*"
 gensim = "*"
 xgboost = "*"
 word2vec = "*"
-scipy = "*"
+scipy = "1.10.1"
 
 [dev-packages]
