@@ -7,10 +7,7 @@ from app.services.resume_parser import (
     process_resumes,
 )
 from app.services.model_training import (
-    train_model_with_smote,
-    train_model_with_svc,
-    train_model_with_svd,
-    train_model_with_random_forest,
+
     train_stacked_classifier,
 )
 from app.utilities import extract_sections, extract_text_from_pdf, clean_text
