@@ -22,5 +22,6 @@ imblearn = "*"
 matplotlib = "*"
 gensim = "*"
 xgboost = "*"
+word2vec = "*"
 
 [dev-packages]

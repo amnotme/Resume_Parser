@@ -6,10 +6,6 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from sklearn.ensemble import StackingClassifier
-from sklearn.svm import SVC
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestClassifier, StackingClassifier
 from sklearn.svm import SVC
@@ -19,9 +15,7 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from xgboost import XGBClassifier
 from sklearn.pipeline import Pipeline
 import numpy as np
-from gensim.models import Word2Vec
-
-
+from word2vec import word2vec
 def load_data(directory, limit_run=True):
     texts, labels = [], []
 
