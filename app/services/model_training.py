@@ -102,20 +102,27 @@ def train_stacked_classifier_with_word2vec(print_predictions=False, limit_run=Tr
     X_test_tokenized = [word_tokenize(text.lower()) for text in X_test]
 
     # Create and train the TF-IDF vectorizer
-    tfidf_vectorizer = TfidfVectorizer(max_features=10000, ngram_range=(1, 3), min_df=3, max_df=0.85)
+    tfidf_vectorizer = TfidfVectorizer(
+        max_features=10000, ngram_range=(1, 3), min_df=3, max_df=0.85
+    )
     X_train_tfidf = tfidf_vectorizer.fit_transform(X_train)
     X_test_tfidf = tfidf_vectorizer.transform(X_test)
 
     # Create and train Word2Vec model
-    word2vec_model = Word2Vec(sentences=X_train_tokenized, vector_size=100, window=5, min_count=5, workers=4)
+    word2vec_model = Word2Vec(
+        sentences=X_train_tokenized, vector_size=100, window=5, min_count=5, workers=4
+    )
 
     # Function to weight Word2Vec vectors by TF-IDF
     def vectorize_text(data_tokenized, data_tfidf, model):
         tfidf_vocab = tfidf_vectorizer.vocabulary_
         vectors = []
         for tokens, tfidf_row in zip(data_tokenized, data_tfidf):
-            weights = [(model.wv[token] * tfidf_row[0, tfidf_vocab[token]])
-                       for token in tokens if token in model.wv.key_to_index and token in tfidf_vocab]
+            weights = [
+                (model.wv[token] * tfidf_row[0, tfidf_vocab[token]])
+                for token in tokens
+                if token in model.wv.key_to_index and token in tfidf_vocab
+            ]
             if weights:
                 vectors.append(np.mean(weights, axis=0))
             else:
@@ -149,6 +156,7 @@ def train_stacked_classifier_with_word2vec(print_predictions=False, limit_run=Tr
     if print_predictions:
         print(classification_report(y_test, predictions))
         print(confusion_matrix(y_test, predictions))
+
 
 def plot_feature_importances_save_file(
     model, vectorizer, n_features=20, file_name="feature_importances.png"
