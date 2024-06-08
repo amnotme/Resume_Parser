@@ -4,7 +4,7 @@ from os import getenv
 from app.utilities import clean_text, extract_text_from_pdf
 
 
-nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load("en_core_web_trf")
 
 data_dir = getenv("RESUME_DATA_FOLDER", "tmp1")
 output_dir_train = getenv("TRAINED_DATA_FOLDER", "tmp2")

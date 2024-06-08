@@ -92,42 +92,38 @@ def train_stacked_classifier_with_word2vec(print_predictions=False, limit_run=Tr
     # Load your data
     texts, labels = load_data(getenv("TRAINED_DATA_FOLDER"), limit_run)
 
+    # Split data
     X_train, X_test, y_train, y_test = train_test_split(
         texts, labels, test_size=0.2, random_state=42
     )
 
-    # Prepare tokenized data for Word2Vec
+    # Tokenize texts
     X_train_tokenized = [word_tokenize(text.lower()) for text in X_train]
     X_test_tokenized = [word_tokenize(text.lower()) for text in X_test]
 
-    # Create and train Word2Vec model
+    # Train Word2Vec model
     vectorizer = Word2Vec(
         sentences=X_train_tokenized, vector_size=100, window=5, min_count=5, workers=4
     )
 
-    # Transform text data to vector data
-    X_train_vectors = [
-        np.mean(
-            [
+    # Function to convert texts to vector
+    def texts_to_vector(texts_tokenized):
+        vectors = []
+        for tokens in texts_tokenized:
+            vector = [
                 vectorizer.wv[word]
-                for word in words
+                for word in tokens
                 if word in vectorizer.wv.key_to_index
-            ],
-            axis=0,
-        )
-        for words in X_train_tokenized
-    ]
-    X_test_vectors = [
-        np.mean(
-            [
-                vectorizer.wv[word]
-                for word in words
-                if word in vectorizer.wv.key_to_index
-            ],
-            axis=0,
-        )
-        for words in X_test_tokenized
-    ]
+            ]
+            if vector:
+                vectors.append(np.mean(vector, axis=0))
+            else:
+                # Append a zero vector if no words matched the Word2Vec model
+                vectors.append(np.zeros(vectorizer.vector_size))
+        return np.array(vectors)
+
+    X_train_vectors = texts_to_vector(X_train_tokenized)
+    X_test_vectors = texts_to_vector(X_test_tokenized)
 
     # Define base learners
     base_learners = [
@@ -144,14 +140,16 @@ def train_stacked_classifier_with_word2vec(print_predictions=False, limit_run=Tr
         estimators=base_learners, final_estimator=meta_learner, cv=5
     )
 
-    # Train the model
-    stacked_model.fit(np.array(X_train_vectors), y_train)
+    # Train the stacked model
+    stacked_model.fit(X_train_vectors, y_train)
 
     # Predictions and evaluation
-    predictions = stacked_model.predict(np.array(X_test_vectors))
+    predictions = stacked_model.predict(X_test_vectors)
     if print_predictions:
         print(classification_report(y_test, predictions))
         print(confusion_matrix(y_test, predictions))
+
+    # return stacked_model  # Optionally return the model
 
 
 def plot_feature_importances_save_file(
