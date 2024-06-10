@@ -8,7 +8,6 @@ from app.services.resume_parser import (
 )
 from app.services.model_training import (
     train_stacked_classifier,
-    train_stacked_classifier_with_word2vec,
 )
 from app.utilities import extract_sections, extract_text_from_pdf, clean_text
 
@@ -61,7 +60,5 @@ def process_data():
 @resume_bp.route("/train", methods=["POST"])
 def train_data():
     # report = train_model_with_smote(print_predictions=True, limit_run=False)
-    report = train_stacked_classifier_with_word2vec(
-        print_predictions=True, limit_run=False
-    )
+    report = train_stacked_classifier(print_predictions=True, limit_run=False)
     return jsonify({"message": "Model trained successfully!", "report": report})

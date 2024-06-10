@@ -6,15 +6,12 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from gensim.models import Word2Vec
 from sklearn.ensemble import StackingClassifier, RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-from sklearn.pipeline import make_pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
-from nltk.tokenize import word_tokenize
 import numpy as np
 
 
@@ -86,76 +83,6 @@ def train_stacked_classifier(print_predictions=False, limit_run=True):
     # Assuming RandomForest is the first model in the base_learners
     rf_model = stacked_model.named_estimators_["rf"]
     plot_feature_importances_save_file(rf_model, vectorizer)
-
-
-def train_stacked_classifier_with_word2vec(print_predictions=False, limit_run=True):
-    # Load your data
-    texts, labels = load_data(getenv("TRAINED_DATA_FOLDER"), limit_run)
-
-    # Split data
-    X_train, X_test, y_train, y_test = train_test_split(
-        texts, labels, test_size=0.2, random_state=42
-    )
-
-    # Tokenize texts
-    X_train_tokenized = [word_tokenize(text.lower()) for text in X_train]
-    X_test_tokenized = [word_tokenize(text.lower()) for text in X_test]
-
-    # Create and train the TF-IDF vectorizer
-    tfidf_vectorizer = TfidfVectorizer(
-        max_features=10000, ngram_range=(1, 3), min_df=3, max_df=0.85
-    )
-    X_train_tfidf = tfidf_vectorizer.fit_transform(X_train)
-    X_test_tfidf = tfidf_vectorizer.transform(X_test)
-
-    # Create and train Word2Vec model
-    word2vec_model = Word2Vec(
-        sentences=X_train_tokenized, vector_size=100, window=5, min_count=5, workers=4
-    )
-
-    # Function to weight Word2Vec vectors by TF-IDF
-    def vectorize_text(data_tokenized, data_tfidf, model):
-        tfidf_vocab = tfidf_vectorizer.vocabulary_
-        vectors = []
-        for tokens, tfidf_row in zip(data_tokenized, data_tfidf):
-            weights = [
-                (model.wv[token] * tfidf_row[0, tfidf_vocab[token]])
-                for token in tokens
-                if token in model.wv.key_to_index and token in tfidf_vocab
-            ]
-            if weights:
-                vectors.append(np.mean(weights, axis=0))
-            else:
-                vectors.append(np.zeros(model.vector_size))
-        return np.array(vectors)
-
-    # Transform text data to vector data
-    X_train_vectors = vectorize_text(X_train_tokenized, X_train_tfidf, word2vec_model)
-    X_test_vectors = vectorize_text(X_test_tokenized, X_test_tfidf, word2vec_model)
-
-    # Define base learners
-    base_learners = [
-        ("rf", RandomForestClassifier(n_estimators=100, max_depth=20, random_state=42)),
-        ("svc", SVC(kernel="linear", probability=True)),
-        ("dt", DecisionTreeClassifier(max_depth=10, random_state=42)),
-    ]
-
-    # Meta-learner
-    meta_learner = LogisticRegression(random_state=42)
-
-    # Stacking Classifier
-    stacked_model = StackingClassifier(
-        estimators=base_learners, final_estimator=meta_learner, cv=5
-    )
-
-    # Train the model
-    stacked_model.fit(X_train_vectors, y_train)
-
-    # Predictions and evaluation
-    predictions = stacked_model.predict(X_test_vectors)
-    if print_predictions:
-        print(classification_report(y_test, predictions))
-        print(confusion_matrix(y_test, predictions))
 
 
 def plot_feature_importances_save_file(
