@@ -15,6 +15,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import pickle
 
+
 def load_data(directory, limit_run=True):
     texts, labels = [], []
 
@@ -47,6 +48,7 @@ def load_data(directory, limit_run=True):
 
 import pickle
 
+
 def train_stacked_classifier(print_predictions=False, limit_run=True):
     print(f"begin training with: {__name__}")
 
@@ -65,12 +67,19 @@ def train_stacked_classifier(print_predictions=False, limit_run=True):
 
     # Setup and fit the stacked model
     base_learners = [
-        ("rf", RandomForestClassifier(n_estimators=200, max_depth=20, random_state=42, class_weight="balanced")),
+        (
+            "rf",
+            RandomForestClassifier(
+                n_estimators=200, max_depth=20, random_state=42, class_weight="balanced"
+            ),
+        ),
         ("svc", SVC(kernel="linear", probability=True)),
-        ("dt", DecisionTreeClassifier(max_depth=20, random_state=42))
+        ("dt", DecisionTreeClassifier(max_depth=20, random_state=42)),
     ]
     meta_learner = LogisticRegression(solver="lbfgs", random_state=42)
-    stacked_model = StackingClassifier(estimators=base_learners, final_estimator=meta_learner, cv=5)
+    stacked_model = StackingClassifier(
+        estimators=base_learners, final_estimator=meta_learner, cv=5
+    )
     stacked_model.fit(X_train_tfidf, y_train)
 
     # Save the model and vectorizer to disk
