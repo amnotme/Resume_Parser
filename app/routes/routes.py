@@ -40,10 +40,10 @@ def handle_upload():
         filepath = os.path.join(os.getenv("UPLOAD_FOLDER", "/tmp"), filename)
         file.save(filepath)
         preprocessed_text = process_resume(filepath)
-        predict_job_category(preprocessed_text)
-        sections = extract_sections(preprocessed_text)
+        prediction = predict_job_category(preprocessed_text)
+        # sections = extract_sections(preprocessed_text)
         # sections = extract_sections(cleaned_text)
-        return jsonify(sections)
+        return jsonify({"prediction": prediction})
     else:
         return jsonify({"error": "File not allowed"}), 400
 
