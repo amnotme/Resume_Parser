@@ -2,20 +2,14 @@ import os
 from os import getenv
 from flask import Blueprint, request, jsonify, render_template
 from werkzeug.utils import secure_filename
-from app.services import (
-    process_resumes,
-    process_resume
-)
+from app.services import process_resumes, process_resume
 from app.services.model_training import (
     train_stacked_classifier,
 )
-from app.services.prediction_utils import (
-    predict_job_category
-)
+from app.services.prediction_utils import predict_job_category
 from app.utilities import (
     extract_sections,
 )
-
 
 
 resume_bp = Blueprint("resume_bp", __name__)

@@ -32,10 +32,7 @@ def save_text_to_file(text, output_dir, job_type=None, count=0):
         f.write(text)
 
 
-def process_resumes(
-    data_dir,
-    output_dir_train
-):
+def process_resumes(data_dir, output_dir_train):
     count_dict = {}
     for root, dirs, files in os.walk(data_dir):
         for file in files:
@@ -54,7 +51,7 @@ def process_resumes(
                     text=preprocessed_text,
                     output_dir=output_dir_train,
                     job_type=job_type,
-                    count=count_dict[job_type]
+                    count=count_dict[job_type],
                 )
                 logger.info(msg=f"Processed {job_type}-{count_dict[job_type]}!")
 
