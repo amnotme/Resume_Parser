@@ -13,4 +13,6 @@ def predict_job_category(resume_text):
     model, vectorizer = _load_model_and_vectorizer()
     resume_tfidf = vectorizer.transform([resume_text])
     prediction = model.predict(resume_tfidf)
-    return prediction[0] # Return the first prediction if only one document was processed
+    return prediction[
+        0
+    ]  # Return the first prediction if only one document was processed
