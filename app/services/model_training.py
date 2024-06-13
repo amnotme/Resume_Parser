@@ -45,10 +45,6 @@ def load_data(directory, limit_run=True):
                     labels.append(job_type)
     return texts, labels
 
-
-import pickle
-
-
 def train_stacked_classifier(print_predictions=False, limit_run=True):
     print(f"begin training with: {__name__}")
 

@@ -2,14 +2,20 @@ import os
 from os import getenv
 from flask import Blueprint, request, jsonify, render_template
 from werkzeug.utils import secure_filename
-from app.services.resume_parser import (
-    preprocess_text,
+from app.services import (
     process_resumes,
+    process_resume
 )
 from app.services.model_training import (
     train_stacked_classifier,
 )
-from app.utilities import extract_sections, extract_text_from_pdf, clean_text
+from app.services.prediction_utils import (
+    predict_job_category
+)
+from app.utilities import (
+    extract_sections,
+)
+
 
 
 resume_bp = Blueprint("resume_bp", __name__)
@@ -39,9 +45,8 @@ def handle_upload():
         filename = secure_filename(file.filename)
         filepath = os.path.join(os.getenv("UPLOAD_FOLDER", "/tmp"), filename)
         file.save(filepath)
-        text = extract_text_from_pdf(filepath)
-        cleaned_text = clean_text(text)
-        preprocessed_text = preprocess_text(cleaned_text)
+        preprocessed_text = process_resume(filepath)
+        predict_job_category(preprocessed_text)
         sections = extract_sections(preprocessed_text)
         # sections = extract_sections(cleaned_text)
         return jsonify(sections)
@@ -54,11 +59,10 @@ def process_data():
     os.makedirs(output_dir_train, exist_ok=True)
     os.makedirs(output_dir_parsed, exist_ok=True)
 
-    process_resumes(data_dir, output_dir_train, output_dir_parsed)
+    process_resumes(data_dir, output_dir_train)
 
 
 @resume_bp.route("/train", methods=["POST"])
 def train_data():
-    # report = train_model_with_smote(print_predictions=True, limit_run=False)
     report = train_stacked_classifier(print_predictions=True, limit_run=False)
     return jsonify({"message": "Model trained successfully!", "report": report})
