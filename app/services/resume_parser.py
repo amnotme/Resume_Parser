@@ -1,7 +1,7 @@
 import spacy
 import os
 from os import getenv
-from app.utilities import clean_text, extract_text_from_pdf
+from app.utilities import clean_text, extract_text_from_pdf, extract_sections_to_text
 import uuid
 from logging import Logger
 
@@ -41,25 +41,28 @@ def process_resumes(data_dir, output_dir_train):
                 pdf_path = os.path.join(root, file)
                 text = extract_text_from_pdf(pdf_path)
                 cleaned_text = clean_text(text)
-                preprocessed_text = preprocess_text(cleaned_text)
+                sections_to_text = extract_sections_to_text(cleaned_text)
+                if cleaned_text:
+                    preprocessed_text = preprocess_text(sections_to_text)
 
-                if job_type not in count_dict:
-                    count_dict[job_type] = 0
-                count_dict[job_type] += 1
+                    if job_type not in count_dict:
+                        count_dict[job_type] = 0
+                    count_dict[job_type] += 1
 
-                save_text_to_file(
-                    text=preprocessed_text,
-                    output_dir=output_dir_train,
-                    job_type=job_type,
-                    count=count_dict[job_type],
-                )
-                logger.info(msg=f"Processed {job_type}-{count_dict[job_type]}!")
+                    save_text_to_file(
+                        text=preprocessed_text,
+                        output_dir=output_dir_train,
+                        job_type=job_type,
+                        count=count_dict[job_type],
+                    )
+                    logger.info(msg=f"Processed {job_type}-{count_dict[job_type]}!")
 
 
 def process_resume(pdf_path):
     text = extract_text_from_pdf(pdf_path)
     cleaned_text = clean_text(text)
-    preprocessed_text = preprocess_text(cleaned_text)
+    extracted_sections_text = extract_sections_to_text(cleaned_text)
+    preprocessed_text = preprocess_text(extracted_sections_text)
 
     logger.info(msg=f"Saving file to /{output_dir_parsed}")
     save_text_to_file(
@@ -67,4 +70,7 @@ def process_resume(pdf_path):
         output_dir=output_dir_parsed,
     )
     logger.info(msg=f"Uploaded resume has been parsed!")
-    return preprocessed_text
+    return {
+        'preprocessed_text': preprocessed_text,
+        'sections': extracted_sections_text
+    }

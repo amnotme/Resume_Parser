@@ -14,8 +14,10 @@ document.getElementById('upload-form').addEventListener('submit', function(event
             uploadStatus.textContent = data.error;
             uploadStatus.style.color = 'red';
         } else {
-            uploadStatus.textContent = 'File uploaded successfully!';
-            uploadStatus.style.color = 'green';
+            if (data.message)
+                uploadStatus.textContent = `File uploaded successfully! \nprediction: ${data.message}, \nsections: ${data.sections}`;
+            else
+                uploadStatus.style.color = 'green';
         }
     })
     .catch(error => {

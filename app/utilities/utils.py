@@ -26,11 +26,11 @@ def extract_text_from_pdf(pdf_path):
     return full_text
 
 
-def extract_sections(text):
+def extract_sections_to_text(text):
     sections = {}
     # Updated regex pattern to be more robust and flexible
     pattern = re.compile(
-        r"(Summary|Highlights|Accomplishments|Experience|Education|Skills)\s*[:\-]?\s*(.*?)(?=\n*(Summary|Highlights|Accomplishments|Experience|Education|Skills)\s*[:\-]?\s*|$)",
+        r"(Summary|Experience|Skills)\s*[:\-]?\s*(.*?)(?=\n*(Summary|Experience|Skills)\s*[:\-]?\s*|$)",
         re.I | re.DOTALL,
     )
     matches = pattern.finditer(text)
@@ -41,4 +41,10 @@ def extract_sections(text):
             sections[section_title] += match.group(2).strip()
         else:
             sections[section_title] = match.group(2).strip()
-    return sections
+
+    full_text = ""
+    for section_key, section in sections.items():
+        text = f"{section_key}: {section} "
+        full_text += text
+
+    return full_text
