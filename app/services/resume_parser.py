@@ -70,7 +70,4 @@ def process_resume(pdf_path):
         output_dir=output_dir_parsed,
     )
     logger.info(msg=f"Uploaded resume has been parsed!")
-    return {
-        'preprocessed_text': preprocessed_text,
-        'sections': extracted_sections_text
-    }
+    return {"preprocessed_text": preprocessed_text, "sections": extracted_sections_text}
