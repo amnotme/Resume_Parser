@@ -2,6 +2,8 @@ import re
 import PyPDF2
 
 
+ALLOWED_SECTIONS_FOR_TRAINING = ['skills', 'summary', 'skill']
+
 def clean_text(text):
     # Normalize common unicode characters
     text = text.replace("â€‹", "").replace("Â", "").replace("ï¼​", "").replace("â—​", "")
@@ -30,7 +32,7 @@ def extract_sections_to_text(text):
     sections = {}
     # Updated regex pattern to be more robust and flexible
     pattern = re.compile(
-        r"(Summary|Experience|Skills)\s*[:\-]?\s*(.*?)(?=\n*(Summary|Experience|Skills)\s*[:\-]?\s*|$)",
+        r"(Summary|Experience|Skills|Skill|Achievements|Highlights|Awards|Projects|Recommendations)\s*[:\-]?\s*(.*?)(?=\n*(Summary|Experience|Skills|Skill|Achievements|Highlights|Awards|Projects|Recommendations)\s*[:\-]?\s*|$)",
         re.I | re.DOTALL,
     )
     matches = pattern.finditer(text)
@@ -44,7 +46,8 @@ def extract_sections_to_text(text):
 
     full_text = ""
     for section_key, section in sections.items():
-        text = f"{section_key}: {section} "
-        full_text += text
+        if section_key in ALLOWED_SECTIONS_FOR_TRAINING:
+            text = f"{section_key}: {section} "
+            full_text += text
 
     return full_text

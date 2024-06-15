@@ -42,7 +42,7 @@ def process_resumes(data_dir, output_dir_train):
                 text = extract_text_from_pdf(pdf_path)
                 cleaned_text = clean_text(text)
                 sections_to_text = extract_sections_to_text(cleaned_text)
-                if cleaned_text:
+                if sections_to_text:
                     preprocessed_text = preprocess_text(sections_to_text)
 
                     if job_type not in count_dict:
