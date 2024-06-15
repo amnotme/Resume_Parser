@@ -2,7 +2,8 @@ import re
 import PyPDF2
 
 
-ALLOWED_SECTIONS_FOR_TRAINING = ['skills', 'summary', 'skill']
+ALLOWED_SECTIONS_FOR_TRAINING = ["skills", "summary", "skill"]
+
 
 def clean_text(text):
     # Normalize common unicode characters
