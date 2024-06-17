@@ -3,6 +3,8 @@ import PyPDF2
 import spacy
 
 nlp = spacy.load("en_core_web_sm")
+
+
 def clean_text(text):
     # Normalize common unicode characters
     text = text.replace("â€‹", "").replace("Â", "").replace("ï¼​", "").replace("â—​", "")
@@ -18,11 +20,11 @@ def clean_text(text):
     return text.strip()
 
 
-
 def extract_entities(text):
     doc = nlp(text)
     entities = [(ent.text, ent.label_) for ent in doc.ents]
     return entities
+
 
 def extract_text_from_pdf(pdf_path):
     with open(pdf_path, "rb") as file:

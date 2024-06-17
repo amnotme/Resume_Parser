@@ -43,17 +43,15 @@ def process_resumes(data_dir, output_dir_train):
                 text = extract_text_from_pdf(pdf_path)
                 cleaned_text = clean_text(text)
                 if cleaned_text:
-                    # Extract sections and preprocess text
                     extracted_sections = extract_sections(cleaned_text)
-                    extracted_sections_text = ' '.join(extracted_sections.values())
+                    extracted_sections_text = " ".join(extracted_sections.values())
                     preprocessed_text = preprocess_text(extracted_sections_text)
 
-                    # Extract entities
-                    entities = extract_entities(preprocessed_text)
-                    entities_text = " ".join([f"{ent[0]}_{ent[1]}" for ent in entities])
-
-                    # Combine preprocessed text with entities
-                    combined_text = preprocessed_text + " " + entities_text
+                    # entities = extract_entities(preprocessed_text)
+                    # entities_text = " ".join([f"{ent[0]}_{ent[1]}" for ent in entities])
+                    #
+                    # combined_text = preprocessed_text + " " + entities_text
+                    combined_text = preprocessed_text
 
                     if job_type not in count_dict:
                         count_dict[job_type] = 0
@@ -69,12 +67,11 @@ def process_resumes(data_dir, output_dir_train):
                     # logger.info(msg=f"Processed {job_type}-{count_dict[job_type]}!")
 
 
-
 def process_resume(pdf_path):
     text = extract_text_from_pdf(pdf_path)
     cleaned_text = clean_text(text)
     extracted_sections = extract_sections(cleaned_text)
-    extracted_sections_text = ' '.join(extracted_sections.values())
+    extracted_sections_text = " ".join(extracted_sections.values())
     preprocessed_text = preprocess_text(extracted_sections_text)
 
     # Extract entities
@@ -90,5 +87,5 @@ def process_resume(pdf_path):
         output_dir=output_dir_parsed,
     )
     logger.info(msg=f"Uploaded resume has been parsed!")
-    print({'sections': extracted_sections})
+    print({"sections": extracted_sections})
     return {"preprocessed_text": combined_text, "sections": extracted_sections}

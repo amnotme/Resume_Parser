@@ -57,5 +57,5 @@ def process_data():
 
 @resume_bp.route("/train", methods=["POST"])
 def train_data():
-    report = train_stacked_classifier(print_predictions=True, limit_run=False)
+    report = train_stacked_classifier(print_predictions=True)
     return jsonify({"message": "Model trained successfully!", "report": report})

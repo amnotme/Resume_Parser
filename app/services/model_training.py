@@ -1,6 +1,6 @@
 import os
 from os import getenv
-
+from imblearn.over_sampling import SMOTE
 from sklearn.metrics import classification_report, confusion_matrix
 import matplotlib
 
@@ -19,69 +19,42 @@ from app.utilities import extract_sections, clean_text
 from app.services.resume_parser import preprocess_text
 from app.utilities import extract_entities
 
-def load_data(directory, limit_run=True):
-    texts, labels = []
 
-    if limit_run:
-        limit_run_value = int(getenv("LIMIT_RUN", 10))
-        for filename in os.listdir(directory):
-            if filename.endswith(".txt") and limit_run_value > 0:
-                filepath = os.path.join(directory, filename)
-                file_name_split = filename.split("-")
-                file_name_split.pop()
-                job_type = "-".join(file_name_split)
-                with open(filepath, "r", encoding="utf-8") as file:
-                    text = file.read()
-                    cleaned_text = clean_text(text)
-                    extracted_sections = extract_sections(cleaned_text)
-                    extracted_sections_text = ' '.join(extracted_sections.values())
-                    preprocessed_text = preprocess_text(extracted_sections_text)
-                    entities = extract_entities(preprocessed_text)
-                    entities_text = " ".join([f"{ent[0]}_{ent[1]}" for ent in entities])
-                    combined_text = preprocessed_text + " " + entities_text
-                    texts.append(combined_text)
-                    labels.append(job_type)
-                limit_run_value -= 1
-            else:
-                break
-    else:
-        for filename in os.listdir(directory):
-            if filename.endswith(".txt"):
-                filepath = os.path.join(directory, filename)
-                file_name_split = filename.split("-")
-                file_name_split.pop()
-                job_type = "-".join(file_name_split)  # Extract job type from filename
-                with open(filepath, "r", encoding="utf-8") as file:
-                    text = file.read()
-                    cleaned_text = clean_text(text)
-                    extracted_sections = extract_sections(cleaned_text)
-                    extracted_sections_text = ' '.join(extracted_sections.values())
-                    preprocessed_text = preprocess_text(extracted_sections_text)
-                    entities = extract_entities(preprocessed_text)
-                    entities_text = " ".join([f"{ent[0]}_{ent[1]}" for ent in entities])
-                    combined_text = preprocessed_text + " " + entities_text
-                    texts.append(combined_text)
-                    labels.append(job_type)
+def load_data(directory):
+    texts, labels = [], []
+    for filename in os.listdir(directory):
+        if filename.endswith(".txt"):
+            filepath = os.path.join(directory, filename)
+            job_type = filename.rsplit("-", 1)[0]  # Extract job type from filename
+            with open(filepath, "r", encoding="utf-8") as file:
+                text = file.read()
+                cleaned_text = clean_text(text)  # Ensure clean_text is properly defined
+                preprocessed_text = preprocess_text(
+                    cleaned_text
+                )  # Ensure preprocess_text is properly defined
+                texts.append(preprocessed_text)
+                labels.append(job_type)
     return texts, labels
 
-def train_stacked_classifier(print_predictions=False, limit_run=True):
-    print(f"begin training with: train_stacked_classifier. loading data")
 
-    # Load your data
-    texts, labels = load_data(getenv("TRAINED_DATA_FOLDER"), limit_run)
+def train_stacked_classifier(print_predictions=False):
+    print(f"begin training with train_stacked_classifier. loading...")
+
+    texts, labels = load_data(getenv("TRAINED_DATA_FOLDER"))
     X_train, X_test, y_train, y_test = train_test_split(
         texts, labels, test_size=0.2, random_state=42
     )
-
-    print("Initializing and fitting vectorizer...")
-    # Initialize and fit the vectorizer
+    print(f"fitting vectorizer...")
     vectorizer = TfidfVectorizer(
-        max_features=10000, ngram_range=(1, 3), min_df=3, max_df=0.85
+        max_features=20000, ngram_range=(1, 2), min_df=2, max_df=0.9
     )
     X_train_tfidf = vectorizer.fit_transform(X_train)
     X_test_tfidf = vectorizer.transform(X_test)
 
-    # Setup and fit the stacked model
+    print(f"using SMOTE to balance data...")
+    smote = SMOTE(random_state=42)
+    X_train_resampled, y_train_resampled = smote.fit_resample(X_train_tfidf, y_train)
+
     base_learners = [
         (
             "rf",
@@ -96,23 +69,19 @@ def train_stacked_classifier(print_predictions=False, limit_run=True):
     stacked_model = StackingClassifier(
         estimators=base_learners, final_estimator=meta_learner, cv=5
     )
-    print("Fitting stacked model...")
-    stacked_model.fit(X_train_tfidf, y_train)
+    print(f"fitting stacked model...")
+    stacked_model.fit(X_train_resampled, y_train_resampled)
 
-    print("Saving stacked model...")
-
-    # Save the model and vectorizer to disk
     with open("stacked_model.pkl", "wb") as model_file:
         pickle.dump(stacked_model, model_file)
     with open("vectorizer.pkl", "wb") as vectorizer_file:
         pickle.dump(vectorizer, vectorizer_file)
 
-    # Optional: Print performance metrics
     if print_predictions:
+        print("printing predictions")
         predictions = stacked_model.predict(X_test_tfidf)
         print(classification_report(y_test, predictions, zero_division=0))
         print(confusion_matrix(y_test, predictions))
-
     # No need to return anything unless required, as model is saved to files
 
 
