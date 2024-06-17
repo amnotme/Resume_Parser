@@ -46,11 +46,6 @@ def process_resumes(data_dir, output_dir_train):
                     extracted_sections = extract_sections(cleaned_text)
                     extracted_sections_text = " ".join(extracted_sections.values())
                     preprocessed_text = preprocess_text(extracted_sections_text)
-
-                    # entities = extract_entities(preprocessed_text)
-                    # entities_text = " ".join([f"{ent[0]}_{ent[1]}" for ent in entities])
-                    #
-                    # combined_text = preprocessed_text + " " + entities_text
                     combined_text = preprocessed_text
 
                     if job_type not in count_dict:

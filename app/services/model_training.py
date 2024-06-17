@@ -22,10 +22,12 @@ from app.utilities import extract_entities
 
 def load_data(directory):
     texts, labels = [], []
+
     for filename in os.listdir(directory):
         if filename.endswith(".txt"):
             filepath = os.path.join(directory, filename)
             job_type = filename.rsplit("-", 1)[0]  # Extract job type from filename
+            print(f'loading: {filename}')
             with open(filepath, "r", encoding="utf-8") as file:
                 text = file.read()
                 cleaned_text = clean_text(text)  # Ensure clean_text is properly defined
@@ -38,22 +40,28 @@ def load_data(directory):
 
 
 def train_stacked_classifier(print_predictions=False):
-    print(f"begin training with train_stacked_classifier. loading...")
+    print("Begin training with train_stacked_classifier. Loading...")
 
-    texts, labels = load_data(getenv("TRAINED_DATA_FOLDER"))
+    texts, labels = load_data(os.getenv("TRAINED_DATA_FOLDER"))
+    print(f"Loaded {len(texts)} texts and {len(labels)} labels.")
+
     X_train, X_test, y_train, y_test = train_test_split(
         texts, labels, test_size=0.2, random_state=42
     )
-    print(f"fitting vectorizer...")
+    print(f"Split data into {len(X_train)} training and {len(X_test)} test samples.")
+
+    print("Fitting vectorizer...")
     vectorizer = TfidfVectorizer(
         max_features=20000, ngram_range=(1, 2), min_df=2, max_df=0.9
     )
     X_train_tfidf = vectorizer.fit_transform(X_train)
     X_test_tfidf = vectorizer.transform(X_test)
+    print(f"Vectorizer fitted. Transformed data shape: {X_train_tfidf.shape}")
 
-    print(f"using SMOTE to balance data...")
+    print("Using SMOTE to balance data...")
     smote = SMOTE(random_state=42)
     X_train_resampled, y_train_resampled = smote.fit_resample(X_train_tfidf, y_train)
+    print(f"Resampled data shape: {X_train_resampled.shape}")
 
     base_learners = [
         (
@@ -69,20 +77,23 @@ def train_stacked_classifier(print_predictions=False):
     stacked_model = StackingClassifier(
         estimators=base_learners, final_estimator=meta_learner, cv=5
     )
-    print(f"fitting stacked model...")
+
+    print("Fitting stacked model...")
     stacked_model.fit(X_train_resampled, y_train_resampled)
+    print("Model fitting complete.")
 
     with open("stacked_model.pkl", "wb") as model_file:
         pickle.dump(stacked_model, model_file)
     with open("vectorizer.pkl", "wb") as vectorizer_file:
         pickle.dump(vectorizer, vectorizer_file)
+    print("Model and vectorizer saved.")
 
     if print_predictions:
-        print("printing predictions")
+        print("Printing predictions...")
         predictions = stacked_model.predict(X_test_tfidf)
         print(classification_report(y_test, predictions, zero_division=0))
         print(confusion_matrix(y_test, predictions))
-    # No need to return anything unless required, as model is saved to files
+        print("Predictions printed.")
 
 
 def plot_feature_importances_save_file(
