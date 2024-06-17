@@ -1,7 +1,8 @@
 import spacy
 import os
 from os import getenv
-from app.utilities import clean_text, extract_text_from_pdf, extract_sections_to_text
+from app.utilities import clean_text, extract_text_from_pdf, extract_sections
+from app.utilities import extract_entities
 import uuid
 from logging import Logger
 
@@ -41,33 +42,53 @@ def process_resumes(data_dir, output_dir_train):
                 pdf_path = os.path.join(root, file)
                 text = extract_text_from_pdf(pdf_path)
                 cleaned_text = clean_text(text)
-                sections_to_text = extract_sections_to_text(cleaned_text)
-                if sections_to_text:
-                    preprocessed_text = preprocess_text(sections_to_text)
+                if cleaned_text:
+                    # Extract sections and preprocess text
+                    extracted_sections = extract_sections(cleaned_text)
+                    extracted_sections_text = ' '.join(extracted_sections.values())
+                    preprocessed_text = preprocess_text(extracted_sections_text)
+
+                    # Extract entities
+                    entities = extract_entities(preprocessed_text)
+                    entities_text = " ".join([f"{ent[0]}_{ent[1]}" for ent in entities])
+
+                    # Combine preprocessed text with entities
+                    combined_text = preprocessed_text + " " + entities_text
 
                     if job_type not in count_dict:
                         count_dict[job_type] = 0
                     count_dict[job_type] += 1
 
                     save_text_to_file(
-                        text=preprocessed_text,
+                        text=combined_text,
                         output_dir=output_dir_train,
                         job_type=job_type,
                         count=count_dict[job_type],
                     )
-                    logger.info(msg=f"Processed {job_type}-{count_dict[job_type]}!")
+                    print(f"Processed {job_type}-{count_dict[job_type]}!")
+                    # logger.info(msg=f"Processed {job_type}-{count_dict[job_type]}!")
+
 
 
 def process_resume(pdf_path):
     text = extract_text_from_pdf(pdf_path)
     cleaned_text = clean_text(text)
-    extracted_sections_text = extract_sections_to_text(cleaned_text)
+    extracted_sections = extract_sections(cleaned_text)
+    extracted_sections_text = ' '.join(extracted_sections.values())
     preprocessed_text = preprocess_text(extracted_sections_text)
+
+    # Extract entities
+    entities = extract_entities(preprocessed_text)
+    entities_text = " ".join([f"{ent[0]}_{ent[1]}" for ent in entities])
+
+    # Combine preprocessed text with entities
+    combined_text = preprocessed_text + " " + entities_text
 
     logger.info(msg=f"Saving file to /{output_dir_parsed}")
     save_text_to_file(
-        text=preprocessed_text,
+        text=combined_text,
         output_dir=output_dir_parsed,
     )
     logger.info(msg=f"Uploaded resume has been parsed!")
-    return {"preprocessed_text": preprocessed_text, "sections": extracted_sections_text}
+    print({'sections': extracted_sections})
+    return {"preprocessed_text": combined_text, "sections": extracted_sections}

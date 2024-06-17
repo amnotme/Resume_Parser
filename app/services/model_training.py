@@ -14,10 +14,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import pickle
-
+import spacy
+from app.utilities import extract_sections, clean_text
+from app.services.resume_parser import preprocess_text
+from app.utilities import extract_entities
 
 def load_data(directory, limit_run=True):
-    texts, labels = [], []
+    texts, labels = []
 
     if limit_run:
         limit_run_value = int(getenv("LIMIT_RUN", 10))
@@ -28,7 +31,15 @@ def load_data(directory, limit_run=True):
                 file_name_split.pop()
                 job_type = "-".join(file_name_split)
                 with open(filepath, "r", encoding="utf-8") as file:
-                    texts.append(file.read())
+                    text = file.read()
+                    cleaned_text = clean_text(text)
+                    extracted_sections = extract_sections(cleaned_text)
+                    extracted_sections_text = ' '.join(extracted_sections.values())
+                    preprocessed_text = preprocess_text(extracted_sections_text)
+                    entities = extract_entities(preprocessed_text)
+                    entities_text = " ".join([f"{ent[0]}_{ent[1]}" for ent in entities])
+                    combined_text = preprocessed_text + " " + entities_text
+                    texts.append(combined_text)
                     labels.append(job_type)
                 limit_run_value -= 1
             else:
@@ -41,13 +52,20 @@ def load_data(directory, limit_run=True):
                 file_name_split.pop()
                 job_type = "-".join(file_name_split)  # Extract job type from filename
                 with open(filepath, "r", encoding="utf-8") as file:
-                    texts.append(file.read())
+                    text = file.read()
+                    cleaned_text = clean_text(text)
+                    extracted_sections = extract_sections(cleaned_text)
+                    extracted_sections_text = ' '.join(extracted_sections.values())
+                    preprocessed_text = preprocess_text(extracted_sections_text)
+                    entities = extract_entities(preprocessed_text)
+                    entities_text = " ".join([f"{ent[0]}_{ent[1]}" for ent in entities])
+                    combined_text = preprocessed_text + " " + entities_text
+                    texts.append(combined_text)
                     labels.append(job_type)
     return texts, labels
 
-
 def train_stacked_classifier(print_predictions=False, limit_run=True):
-    print(f"begin training with: {__name__}")
+    print(f"begin training with: train_stacked_classifier. loading data")
 
     # Load your data
     texts, labels = load_data(getenv("TRAINED_DATA_FOLDER"), limit_run)
@@ -55,6 +73,7 @@ def train_stacked_classifier(print_predictions=False, limit_run=True):
         texts, labels, test_size=0.2, random_state=42
     )
 
+    print("Initializing and fitting vectorizer...")
     # Initialize and fit the vectorizer
     vectorizer = TfidfVectorizer(
         max_features=10000, ngram_range=(1, 3), min_df=3, max_df=0.85
@@ -77,7 +96,10 @@ def train_stacked_classifier(print_predictions=False, limit_run=True):
     stacked_model = StackingClassifier(
         estimators=base_learners, final_estimator=meta_learner, cv=5
     )
+    print("Fitting stacked model...")
     stacked_model.fit(X_train_tfidf, y_train)
+
+    print("Saving stacked model...")
 
     # Save the model and vectorizer to disk
     with open("stacked_model.pkl", "wb") as model_file:

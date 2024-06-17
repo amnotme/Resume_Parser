@@ -1,10 +1,8 @@
 import re
 import PyPDF2
+import spacy
 
-
-ALLOWED_SECTIONS_FOR_TRAINING = ["skills", "summary", "skill"]
-
-
+nlp = spacy.load("en_core_web_sm")
 def clean_text(text):
     # Normalize common unicode characters
     text = text.replace("â€‹", "").replace("Â", "").replace("ï¼​", "").replace("â—​", "")
@@ -20,6 +18,12 @@ def clean_text(text):
     return text.strip()
 
 
+
+def extract_entities(text):
+    doc = nlp(text)
+    entities = [(ent.text, ent.label_) for ent in doc.ents]
+    return entities
+
 def extract_text_from_pdf(pdf_path):
     with open(pdf_path, "rb") as file:
         pdf_reader = PyPDF2.PdfReader(file)
@@ -29,7 +33,7 @@ def extract_text_from_pdf(pdf_path):
     return full_text
 
 
-def extract_sections_to_text(text):
+def extract_sections(text):
     sections = {}
     # Updated regex pattern to be more robust and flexible
     pattern = re.compile(
@@ -45,10 +49,4 @@ def extract_sections_to_text(text):
         else:
             sections[section_title] = match.group(2).strip()
 
-    full_text = ""
-    for section_key, section in sections.items():
-        if section_key in ALLOWED_SECTIONS_FOR_TRAINING:
-            text = f"{section_key}: {section} "
-            full_text += text
-
-    return full_text
+    return sections
