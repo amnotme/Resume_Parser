@@ -27,7 +27,7 @@ def load_data(directory):
         if filename.endswith(".txt"):
             filepath = os.path.join(directory, filename)
             job_type = filename.rsplit("-", 1)[0]  # Extract job type from filename
-            print(f'loading: {filename}')
+            print(f"loading: {filename}")
             with open(filepath, "r", encoding="utf-8") as file:
                 text = file.read()
                 cleaned_text = clean_text(text)  # Ensure clean_text is properly defined
