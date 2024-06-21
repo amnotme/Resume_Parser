@@ -1,4 +1,4 @@
-job_skills = {
+JOB_SKILLS = {
     "Backend Developer": [
         "Java",
         "Spring",
