@@ -4,6 +4,7 @@ from imblearn.over_sampling import SMOTE
 from sklearn.metrics import classification_report, confusion_matrix
 import matplotlib
 import pandas as pd
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from sklearn.ensemble import StackingClassifier, RandomForestClassifier
@@ -20,21 +21,22 @@ from app.services.resume_parser import preprocess_text
 from app.utilities import extract_entities
 from app.dataset import JOB_SKILLS
 
+
 def load_data(csv_path):
     df = pd.read_csv(csv_path)
     texts, labels = [], []
     for index, row in df.iterrows():
-        category = row['Category']
-        resume_text = row['Resume']
+        category = row["Category"]
+        resume_text = row["Resume"]
         cleaned_text = clean_text(resume_text)
         extracted_sections = extract_sections(cleaned_text)
-        extracted_sections_text = ' '.join(extracted_sections.values())
+        extracted_sections_text = " ".join(extracted_sections.values())
         preprocessed_text = preprocess_text(extracted_sections_text)
-        relevant_skills = ' '.join(JOB_SKILLS.get(category, []))
+        relevant_skills = " ".join(JOB_SKILLS.get(category, []))
         combined_text = preprocessed_text + " " + relevant_skills
         texts.append(combined_text)
         labels.append(category)
-        print(f'loading... {category}:{combined_text[:70]}...')
+        print(f"loading... {category}:{combined_text[:70]}...")
     return texts, labels
 
 
