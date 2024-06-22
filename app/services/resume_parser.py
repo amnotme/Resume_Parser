@@ -1,12 +1,8 @@
 import spacy
-import os
 from os import getenv
 from app.utilities import clean_text, extract_text_from_pdf
 from app.utilities import extract_entities, save_text_to_file
-import uuid
-from logging import Logger
 
-logger = Logger("resume_parser")
 nlp = spacy.load("en_core_web_trf")
 
 data_dir = getenv("RESUME_DATA_FOLDER", "tmp1")
@@ -34,11 +30,9 @@ def process_resume(pdf_path):
     # Combine preprocessed text with entities
     combined_text = preprocessed_text + " " + entities_text
 
-    logger.info(msg=f"Saving file to /{output_dir_parsed}")
     save_text_to_file(
         text=combined_text,
         output_dir=output_dir_parsed,
     )
-    logger.info(msg=f"Uploaded resume has been parsed!")
     print({"entities": entities})
     return {"preprocessed_text": combined_text}
