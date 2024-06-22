@@ -10,33 +10,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
 from imblearn.over_sampling import SMOTE
-from app.services import process_resume, preprocess_text
+from app.services import process_resume, preprocess_text, predict_job_category
 from app.utilities import extract_top_skills, clean_text
 from app.dataset import JOB_SKILLS
 
 # Set up the page title and layout
 st.set_page_config(page_title="Resume Parser", layout="wide")
-
-
-# Load the model and vectorizer
-@st.cache_resource
-def load_model_and_vectorizer():
-    with open("app/trained_models/stacked_model.pkl", "rb") as model_file:
-        model = pickle.load(model_file)
-    with open("app/trained_models/vectorizer.pkl", "rb") as vectorizer_file:
-        vectorizer = pickle.load(vectorizer_file)
-    return model, vectorizer
-
-
-# Predict job category
-def predict_job_category(resume_text):
-    model, vectorizer = load_model_and_vectorizer()
-    resume_tfidf = vectorizer.transform([resume_text])
-    prediction = model.predict(resume_tfidf)
-    return prediction[
-        0
-    ]  # Return the first prediction if only one document was processed
-
 
 # Training the model
 def train_stacked_classifier():
