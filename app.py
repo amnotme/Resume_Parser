@@ -17,6 +17,10 @@ from app.dataset import JOB_SKILLS
 # Set up the page title and layout
 st.set_page_config(page_title="Resume Parser", layout="wide")
 
+# Initialize session state for uploaded resume
+if 'uploaded_file' not in st.session_state:
+    st.session_state.uploaded_file = None
+
 
 # Training the model
 def train_stacked_classifier():
@@ -77,7 +81,8 @@ st.title("Resume Parser")
 
 # Upload Resume Section
 st.header("Upload New File")
-uploaded_file = st.file_uploader("Choose a file", type=["pdf", "txt"])
+uploaded_file = st.file_uploader("Choose a file", type=["pdf"])
+
 if uploaded_file is not None:
     file_details = {
         "filename": uploaded_file.name,
@@ -93,11 +98,29 @@ if uploaded_file is not None:
         f.write(uploaded_file.getbuffer())
     # Process the resume
     filepath = os.path.join("tempDir", uploaded_file.name)
-    preprocessed_text = process_resume(filepath)["preprocessed_text"]
+    result = process_resume(filepath)
+    preprocessed_text = result["preprocessed_text"]
     prediction = predict_job_category(preprocessed_text)
     top_skills = extract_top_skills(preprocessed_text, prediction)
-    st.write(f"Prediction: {prediction}")
-    st.write(f"Top Skills: {top_skills}")
+
+    # Display the prediction
+    st.subheader(f"Predicted Job Category: {prediction}")
+    st.subheader(f"Top Skills for {prediction}")
+    st.write(top_skills)
+
+    # Display top skills for other job categories
+    with st.expander("Compare with Other Job Categories"):
+        for category in JOB_SKILLS.keys():
+            if category != prediction:
+                other_top_skills = extract_top_skills(preprocessed_text, category)
+                if other_top_skills:
+                    st.subheader(f"Top Skills for {category}")
+                    st.write(other_top_skills)
+
+# Clear output when new resume is uploaded
+if st.session_state.uploaded_file and uploaded_file != st.session_state.uploaded_file:
+    st.session_state.uploaded_file = uploaded_file
+    st.experimental_rerun()
 
 # Train Model Section
 st.header("Train Model")

@@ -4,6 +4,7 @@ import spacy
 from app.dataset import JOB_SKILLS
 import uuid
 import os
+import re
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -34,11 +35,16 @@ def extract_text_from_pdf(pdf_path):
 
 def extract_top_skills(preprocessed_text, job_category):
     skills = JOB_SKILLS.get(job_category, [])
-    top_skills = [
-        skill for skill in skills if skill.lower() in preprocessed_text.lower()
-    ]
-    return top_skills
+    preprocessed_text = preprocessed_text.lower()  # Ensure the text is lowercased
+    top_skills = []
 
+    for skill in skills:
+        skill_lower = skill.lower()
+        # Use regex to match whole words only
+        if re.search(r'\b' + re.escape(skill_lower) + r'\b', preprocessed_text):
+            top_skills.append(skill)
+
+    return top_skills
 
 def save_text_to_file(text, output_dir, job_type=None, count=0):
     if job_type and count:

@@ -1,7 +1,6 @@
 import spacy
 from os import getenv
 from app.utilities.utils import clean_text, extract_text_from_pdf, save_text_to_file
-from spacy.pipeline import EntityRuler
 from app.dataset import JOB_SKILLS
 
 data_dir = getenv("RESUME_DATA_FOLDER", "tmp1")
@@ -20,31 +19,27 @@ def _load_custom_ner():
         for skills in JOB_SKILLS.values()
         for skill in skills
     ]
-    for pattern in patterns[:5]:  # Print first 5 patterns for verification
-        print(f"Adding pattern: {pattern}")
 
     ruler.add_patterns(patterns)
 
     return nlp
 
+custom_ner_model = _load_custom_ner()
 
 def preprocess_text(text):
     text = text.lower()
-    nlp = _load_custom_ner()
 
-    doc = nlp(text)
+    doc = custom_ner_model(text)
     tokens = [token.lemma_ for token in doc if not token.is_stop and not token.is_punct]
     return " ".join(tokens)
-
 
 def process_resume(pdf_path):
     text = extract_text_from_pdf(pdf_path)
     cleaned_text = clean_text(text)
     preprocessed_text = preprocess_text(cleaned_text)
 
-    # Extract entities using the custom NER pipeline
-    nlp = _load_custom_ner()
-    doc = nlp(preprocessed_text)
+    # Extract entities using the preloaded custom NER pipeline
+    doc = custom_ner_model(preprocessed_text)
     entities = [(ent.text, ent.label_) for ent in doc.ents]
 
     # Debugging: Print the preprocessed text and entities found
@@ -62,5 +57,4 @@ def process_resume(pdf_path):
         text=combined_text,
         output_dir=output_dir_parsed,
     )
-    print({"entities": entities})
     return {"preprocessed_text": combined_text}

@@ -161,6 +161,7 @@ cython_debug/
 Pipfile.lock
 uploaded_resumes/*
 parsed_pdfs/*
+tempDir/*
 
 resume_parser_data/.DS_Store
 .DS_Store

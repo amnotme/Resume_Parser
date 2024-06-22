@@ -26,4 +26,6 @@ word2vec = "*"
 scipy = "1.10.1"
 uuid = "*"
 streamlit = "*"
+watchdog = "*"
+
 [dev-packages]
