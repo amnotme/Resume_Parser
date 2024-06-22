@@ -1,7 +1,7 @@
 import spacy
 import os
 from os import getenv
-from app.utilities import clean_text, extract_text_from_pdf, extract_sections
+from app.utilities import clean_text, extract_text_from_pdf
 from app.utilities import extract_entities, save_text_to_file
 import uuid
 from logging import Logger
@@ -32,8 +32,6 @@ def process_resumes(data_dir, output_dir_train):
                 text = extract_text_from_pdf(pdf_path)
                 cleaned_text = clean_text(text)
                 if cleaned_text:
-                    # extracted_sections = extract_sections(cleaned_text)
-                    # extracted_sections_text = " ".join(extracted_sections.values())
                     preprocessed_text = preprocess_text(cleaned_text)
                     combined_text = preprocessed_text
 

@@ -38,25 +38,6 @@ def extract_text_from_pdf(pdf_path):
     return full_text
 
 
-def extract_sections(text):
-    sections = {}
-    # Updated regex pattern to be more robust and flexible
-    pattern = re.compile(
-        r"(Summary|Experience|Skills|Skill|Achievements|Highlights|Awards|Projects|Recommendations)\s*[:\-]?\s*(.*?)(?=\n*(Summary|Experience|Skills|Skill|Achievements|Highlights|Awards|Projects|Recommendations)\s*[:\-]?\s*|$)",
-        re.I | re.DOTALL,
-    )
-    matches = pattern.finditer(text)
-    for match in matches:
-        section_title = match.group(1).lower()  # Normalize the key to lowercase
-        if section_title in sections:
-            # Append new content with a newline for readability if the section already exists
-            sections[section_title] += match.group(2).strip()
-        else:
-            sections[section_title] = match.group(2).strip()
-
-    return sections
-
-
 def extract_top_skills(preprocessed_text, job_category):
     skills = JOB_SKILLS.get(job_category, [])
     top_skills = [

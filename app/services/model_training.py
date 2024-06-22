@@ -16,7 +16,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import pickle
 import spacy
-from app.utilities import extract_sections, clean_text
+from app.utilities import clean_text
 from app.services.resume_parser import preprocess_text
 from app.utilities import extract_entities
 from app.dataset import JOB_SKILLS
