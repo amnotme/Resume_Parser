@@ -17,6 +17,7 @@ from app.dataset import JOB_SKILLS
 # Set up the page title and layout
 st.set_page_config(page_title="Resume Parser", layout="wide")
 
+
 # Training the model
 def train_stacked_classifier():
     st.write("Training the model...")

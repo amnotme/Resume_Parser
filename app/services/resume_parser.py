@@ -1,10 +1,6 @@
 import spacy
 from os import getenv
-from app.utilities.utils import (
-    clean_text,
-    extract_text_from_pdf,
-    save_text_to_file
-)
+from app.utilities.utils import clean_text, extract_text_from_pdf, save_text_to_file
 from spacy.pipeline import EntityRuler
 from app.dataset import JOB_SKILLS
 
@@ -15,17 +11,21 @@ output_dir_uploaded = getenv("UPLOAD_FOLDER", "tmp4")
 
 
 def _load_custom_ner():
-	nlp = spacy.load("en_core_web_sm")
-	ruler = nlp.add_pipe("entity_ruler", before="ner")
+    nlp = spacy.load("en_core_web_sm")
+    ruler = nlp.add_pipe("entity_ruler", before="ner")
 
-	# Debugging: Print the patterns to verify
-	patterns = [{"label": "SKILL", "pattern": skill.lower()} for skills in JOB_SKILLS.values() for skill in skills]
-	for pattern in patterns[:5]:  # Print first 5 patterns for verification
-		print(f"Adding pattern: {pattern}")
+    # Debugging: Print the patterns to verify
+    patterns = [
+        {"label": "SKILL", "pattern": skill.lower()}
+        for skills in JOB_SKILLS.values()
+        for skill in skills
+    ]
+    for pattern in patterns[:5]:  # Print first 5 patterns for verification
+        print(f"Adding pattern: {pattern}")
 
-	ruler.add_patterns(patterns)
+    ruler.add_patterns(patterns)
 
-	return nlp
+    return nlp
 
 
 def preprocess_text(text):
@@ -48,7 +48,9 @@ def process_resume(pdf_path):
     entities = [(ent.text, ent.label_) for ent in doc.ents]
 
     # Debugging: Print the preprocessed text and entities found
-    print(f"Preprocessed text: {preprocessed_text[:200]}...")  # Print first 200 characters
+    print(
+        f"Preprocessed text: {preprocessed_text[:200]}..."
+    )  # Print first 200 characters
     print(f"Entities found: {entities}")
 
     entities_text = " ".join([f"{ent[0]}_{ent[1]}" for ent in entities])

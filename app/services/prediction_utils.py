@@ -2,6 +2,7 @@ import pickle
 import os
 import streamlit as st
 
+
 @st.cache_resource
 def _load_model_and_vectorizer():
     with open(
