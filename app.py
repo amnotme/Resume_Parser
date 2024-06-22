@@ -18,7 +18,7 @@ from app.dataset import JOB_SKILLS
 st.set_page_config(page_title="Resume Parser", layout="wide")
 
 # Initialize session state for uploaded resume
-if 'uploaded_file' not in st.session_state:
+if "uploaded_file" not in st.session_state:
     st.session_state.uploaded_file = None
 
 

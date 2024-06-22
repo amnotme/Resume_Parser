@@ -24,7 +24,9 @@ def _load_custom_ner():
 
     return nlp
 
+
 custom_ner_model = _load_custom_ner()
+
 
 def preprocess_text(text):
     text = text.lower()
@@ -32,6 +34,7 @@ def preprocess_text(text):
     doc = custom_ner_model(text)
     tokens = [token.lemma_ for token in doc if not token.is_stop and not token.is_punct]
     return " ".join(tokens)
+
 
 def process_resume(pdf_path):
     text = extract_text_from_pdf(pdf_path)
