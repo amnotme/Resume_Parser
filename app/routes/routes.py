@@ -2,7 +2,7 @@ import os
 from os import getenv
 from flask import Blueprint, request, jsonify, render_template
 from werkzeug.utils import secure_filename
-from app.services import process_resumes, process_resume
+from app.services import process_resume
 from app.services.model_training import (
     train_stacked_classifier,
 )
@@ -49,14 +49,6 @@ def handle_upload():
         return jsonify({"message": prediction, "top_skills": top_skills}), 201
     else:
         return jsonify({"error": "File not allowed"}), 400
-
-
-@resume_bp.route("/process", methods=["POST"])
-def process_data():
-    os.makedirs(output_dir_train, exist_ok=True)
-    os.makedirs(output_dir_parsed, exist_ok=True)
-
-    process_resumes(data_dir, output_dir_train)
 
 
 @resume_bp.route("/train", methods=["POST"])

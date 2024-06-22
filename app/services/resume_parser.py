@@ -22,33 +22,6 @@ def preprocess_text(text):
     return " ".join(tokens)
 
 
-def process_resumes(data_dir, output_dir_train):
-    count_dict = {}
-    for root, dirs, files in os.walk(data_dir):
-        for file in files:
-            if file.endswith(".pdf"):
-                job_type = os.path.basename(root)
-                pdf_path = os.path.join(root, file)
-                text = extract_text_from_pdf(pdf_path)
-                cleaned_text = clean_text(text)
-                if cleaned_text:
-                    preprocessed_text = preprocess_text(cleaned_text)
-                    combined_text = preprocessed_text
-
-                    if job_type not in count_dict:
-                        count_dict[job_type] = 0
-                    count_dict[job_type] += 1
-
-                    save_text_to_file(
-                        text=combined_text,
-                        output_dir=output_dir_train,
-                        job_type=job_type,
-                        count=count_dict[job_type],
-                    )
-                    print(f"Processed {job_type}-{count_dict[job_type]}!")
-                    # logger.info(msg=f"Processed {job_type}-{count_dict[job_type]}!")
-
-
 def process_resume(pdf_path):
     text = extract_text_from_pdf(pdf_path)
     cleaned_text = clean_text(text)
