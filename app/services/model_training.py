@@ -92,39 +92,3 @@ def train_stacked_classifier(print_predictions=False):
         print(classification_report(y_test, predictions, zero_division=0))
         print(confusion_matrix(y_test, predictions))
 
-
-def plot_feature_importances_save_file(
-    model, vectorizer, n_features=20, file_name="feature_importances.png"
-):
-    if hasattr(model, "feature_importances_"):
-        importances = model.feature_importances_
-        feature_names = vectorizer.get_feature_names_out()
-        indices = np.argsort(importances)[-n_features:]
-        sorted_feature_names = [feature_names[i] for i in indices]
-        sorted_importances = importances[indices]
-
-        plt.figure(figsize=(10, 8))
-        plt.title("Top Feature Importances", fontsize=16)
-        bars = plt.barh(
-            range(n_features), sorted_importances, align="center", color="skyblue"
-        )
-        plt.yticks(range(n_features), sorted_feature_names, fontsize=12)
-        plt.xlabel("Relative Importance", fontsize=14)
-        plt.ylabel("Features", fontsize=14)
-
-        for bar in bars:
-            plt.text(
-                bar.get_width(),
-                bar.get_y() + bar.get_height() / 2,
-                f"{bar.get_width():.4f}",
-                va="center",
-                ha="left",
-                fontsize=10,
-                color="blue",
-            )
-
-        plt.tight_layout()
-        plt.savefig(file_name)
-        plt.close()
-    else:
-        print("The model does not support feature importances.")
