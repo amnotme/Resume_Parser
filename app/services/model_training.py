@@ -29,9 +29,7 @@ def load_data(csv_path):
         category = row["Category"]
         resume_text = row["Resume"]
         cleaned_text = clean_text(resume_text)
-        extracted_sections = extract_sections(cleaned_text)
-        extracted_sections_text = " ".join(extracted_sections.values())
-        preprocessed_text = preprocess_text(extracted_sections_text)
+        preprocessed_text = preprocess_text(cleaned_text)
         relevant_skills = " ".join(JOB_SKILLS.get(category, []))
         combined_text = preprocessed_text + " " + relevant_skills
         texts.append(combined_text)
@@ -78,9 +76,14 @@ def train_stacked_classifier(print_predictions=False):
     print(f"fitting stacked model...")
     stacked_model.fit(X_train_resampled, y_train_resampled)
 
-    with open("stacked_model.pkl", "wb") as model_file:
+    with open(
+        os.getenv("TRAINED_MODELS_PATH", "app/trained_models/") + "stacked_model.pkl",
+        "wb",
+    ) as model_file:
         pickle.dump(stacked_model, model_file)
-    with open("vectorizer.pkl", "wb") as vectorizer_file:
+    with open(
+        os.getenv("TRAINED_MODELS_PATH", "app/trained_models/") + "vectorizer.pkl", "wb"
+    ) as vectorizer_file:
         pickle.dump(vectorizer, vectorizer_file)
 
     if print_predictions:

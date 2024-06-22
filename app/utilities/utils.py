@@ -1,6 +1,9 @@
 import re
 import PyPDF2
 import spacy
+from app.dataset import JOB_SKILLS
+import uuid
+import os
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -52,3 +55,22 @@ def extract_sections(text):
             sections[section_title] = match.group(2).strip()
 
     return sections
+
+
+def extract_top_skills(preprocessed_text, job_category):
+    skills = JOB_SKILLS.get(job_category, [])
+    top_skills = [
+        skill for skill in skills if skill.lower() in preprocessed_text.lower()
+    ]
+    return top_skills
+
+
+def save_text_to_file(text, output_dir, job_type=None, count=0):
+    if job_type and count:
+        filename = f"{job_type}-{count}.txt"
+    else:
+        filename = f"{uuid.uuid4()}.txt"
+    filepath = os.path.join(output_dir, filename)
+
+    with open(filepath, "w") as f:
+        f.write(text)

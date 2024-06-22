@@ -2,7 +2,7 @@ import spacy
 import os
 from os import getenv
 from app.utilities import clean_text, extract_text_from_pdf, extract_sections
-from app.utilities import extract_entities
+from app.utilities import extract_entities, save_text_to_file
 import uuid
 from logging import Logger
 
@@ -22,17 +22,6 @@ def preprocess_text(text):
     return " ".join(tokens)
 
 
-def save_text_to_file(text, output_dir, job_type=None, count=0):
-    if job_type and count:
-        filename = f"{job_type}-{count}.txt"
-    else:
-        filename = f"{uuid.uuid4()}.txt"
-    filepath = os.path.join(output_dir, filename)
-
-    with open(filepath, "w") as f:
-        f.write(text)
-
-
 def process_resumes(data_dir, output_dir_train):
     count_dict = {}
     for root, dirs, files in os.walk(data_dir):
@@ -43,9 +32,9 @@ def process_resumes(data_dir, output_dir_train):
                 text = extract_text_from_pdf(pdf_path)
                 cleaned_text = clean_text(text)
                 if cleaned_text:
-                    extracted_sections = extract_sections(cleaned_text)
-                    extracted_sections_text = " ".join(extracted_sections.values())
-                    preprocessed_text = preprocess_text(extracted_sections_text)
+                    # extracted_sections = extract_sections(cleaned_text)
+                    # extracted_sections_text = " ".join(extracted_sections.values())
+                    preprocessed_text = preprocess_text(cleaned_text)
                     combined_text = preprocessed_text
 
                     if job_type not in count_dict:
@@ -65,9 +54,7 @@ def process_resumes(data_dir, output_dir_train):
 def process_resume(pdf_path):
     text = extract_text_from_pdf(pdf_path)
     cleaned_text = clean_text(text)
-    extracted_sections = extract_sections(cleaned_text)
-    extracted_sections_text = " ".join(extracted_sections.values())
-    preprocessed_text = preprocess_text(extracted_sections_text)
+    preprocessed_text = preprocess_text(cleaned_text)
 
     # Extract entities
     entities = extract_entities(preprocessed_text)
@@ -82,5 +69,5 @@ def process_resume(pdf_path):
         output_dir=output_dir_parsed,
     )
     logger.info(msg=f"Uploaded resume has been parsed!")
-    print({"sections": extracted_sections})
-    return {"preprocessed_text": combined_text, "sections": extracted_sections}
+    print({"entities": entities})
+    return {"preprocessed_text": combined_text}

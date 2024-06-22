@@ -7,7 +7,7 @@ from app.services.model_training import (
     train_stacked_classifier,
 )
 from app.services.prediction_utils import predict_job_category
-
+from app.utilities import extract_top_skills
 
 resume_bp = Blueprint("resume_bp", __name__)
 
@@ -38,11 +38,15 @@ def handle_upload():
         file.save(filepath)
 
         # Preprocess the resume
-        preprocessed_text, sections = process_resume(filepath)
-        prediction = predict_job_category(preprocessed_text)
+        preprocessed_text = process_resume(filepath)["preprocessed_text"]
 
         # Predict the job category
-        return jsonify({"message": prediction, "sections": sections}), 201
+        prediction = predict_job_category(preprocessed_text)
+
+        # Extract top skills
+        top_skills = extract_top_skills(preprocessed_text, prediction)
+        print({"message": prediction, "top_skills": top_skills})
+        return jsonify({"message": prediction, "top_skills": top_skills}), 201
     else:
         return jsonify({"error": "File not allowed"}), 400
 
