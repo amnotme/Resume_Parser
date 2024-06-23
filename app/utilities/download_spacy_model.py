@@ -13,6 +13,3 @@ def download_and_load_spacy_model():
         subprocess.run([os.sys.executable, "-m", "spacy", "download", model_name], check=True)
         nlp = spacy.load(model_name)
     return nlp
-
-if __name__ == "__main__":
-    download_and_load_spacy_model()
