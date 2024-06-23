@@ -9,6 +9,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+import seaborn as sns
 from imblearn.over_sampling import SMOTE
 from app.services import process_resume, preprocess_text, predict_job_category
 from app.utilities import extract_top_skills, clean_text
@@ -84,6 +87,14 @@ def descriptive_analysis(text):
     unique_words = len(set(text.split()))
     return word_count, unique_words
 
+# Generate Word Cloud
+def generate_wordcloud(text):
+    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis('off')
+    return plt
+
 
 # Streamlit interface
 st.title("Resume Parser")
@@ -118,6 +129,11 @@ if uploaded_file is not None:
     st.write(f"Word Count: {word_count}")
     st.write(f"Unique Words: {unique_words}")
 
+    # Word Cloud
+    st.subheader("Word Cloud")
+    wordcloud_plot = generate_wordcloud(preprocessed_text)
+    st.pyplot(wordcloud_plot)
+
     # Display the prediction
     st.subheader(f"Predicted Job Category: **{prediction}**")
     st.markdown("---")
@@ -125,6 +141,21 @@ if uploaded_file is not None:
     # Display top skills for the predicted job category
     st.subheader(f"Top Skills for **{prediction}**")
     st.markdown(", ".join(top_skills))
+
+    # Bar chart for top skills comparison
+    st.subheader("Top Skills Comparison")
+    skills_data = {
+        "Job Category": [],
+        "Skill": []
+    }
+    for category in JOB_SKILLS.keys():
+        other_top_skills = extract_top_skills(preprocessed_text, category)
+        skills_data["Job Category"].extend([category] * len(other_top_skills))
+        skills_data["Skill"].extend(other_top_skills)
+    skills_df = pd.DataFrame(skills_data)
+    sns.countplot(data=skills_df, y="Skill", hue="Job Category", palette="viridis")
+    plt.title("Top Skills Comparison Across Job Categories")
+    st.pyplot()
 
     # Display top skills for other job categories
     with st.expander("Compare with Other Job Categories"):

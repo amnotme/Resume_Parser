@@ -27,5 +27,7 @@ scipy = "1.10.1"
 uuid = "*"
 streamlit = "*"
 watchdog = "*"
+wordcloud = "*"
+seaborn = "*"
 
 [dev-packages]
