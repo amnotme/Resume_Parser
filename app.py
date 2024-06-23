@@ -15,7 +15,9 @@ from app.utilities import extract_top_skills, clean_text
 from app.dataset import JOB_SKILLS
 
 # Set up the page title and layout
-st.set_page_config(page_title="Resume Parser", layout="wide")
+st.set_page_config(
+    page_title="Resume Parser", layout="wide", initial_sidebar_state="expanded"
+)
 
 # Initialize session state for uploaded resume
 if "uploaded_file" not in st.session_state:
@@ -76,6 +78,13 @@ def train_stacked_classifier():
     st.write(confusion_matrix(y_test, predictions))
 
 
+# Descriptive Analysis Function
+def descriptive_analysis(text):
+    word_count = len(text.split())
+    unique_words = len(set(text.split()))
+    return word_count, unique_words
+
+
 # Streamlit interface
 st.title("Resume Parser")
 
@@ -103,10 +112,19 @@ if uploaded_file is not None:
     prediction = predict_job_category(preprocessed_text)
     top_skills = extract_top_skills(preprocessed_text, prediction)
 
+    # Descriptive analysis
+    word_count, unique_words = descriptive_analysis(preprocessed_text)
+    st.subheader("Descriptive Analysis")
+    st.write(f"Word Count: {word_count}")
+    st.write(f"Unique Words: {unique_words}")
+
     # Display the prediction
-    st.subheader(f"Predicted Job Category: {prediction}")
-    st.subheader(f"Top Skills for {prediction}")
-    st.write(top_skills)
+    st.subheader(f"Predicted Job Category: **{prediction}**")
+    st.markdown("---")
+
+    # Display top skills for the predicted job category
+    st.subheader(f"Top Skills for **{prediction}**")
+    st.markdown(", ".join(top_skills))
 
     # Display top skills for other job categories
     with st.expander("Compare with Other Job Categories"):
@@ -114,8 +132,10 @@ if uploaded_file is not None:
             if category != prediction:
                 other_top_skills = extract_top_skills(preprocessed_text, category)
                 if other_top_skills:
-                    st.subheader(f"Top Skills for {category}")
-                    st.write(other_top_skills)
+                    st.subheader(f"Top Skills for **{category}**")
+                    st.markdown(", ".join(other_top_skills))
+                else:
+                    st.subheader(f"No relevant skills found for **{category}**")
 
 # Clear output when new resume is uploaded
 if st.session_state.uploaded_file and uploaded_file != st.session_state.uploaded_file:
