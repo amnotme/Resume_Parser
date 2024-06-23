@@ -44,6 +44,9 @@ def extract_top_skills(preprocessed_text, job_category):
 
 
 def save_text_to_file(text, output_dir, job_type=None, count=0):
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     if job_type and count:
         filename = f"{job_type}-{count}.txt"
     else:

@@ -1,4 +1,3 @@
-import spacy
 from os import getenv
 from app.utilities.utils import clean_text, extract_text_from_pdf, save_text_to_file
 from app.dataset import JOB_SKILLS
