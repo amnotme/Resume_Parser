@@ -29,5 +29,7 @@ streamlit = "*"
 watchdog = "*"
 wordcloud = "*"
 seaborn = "*"
+streamlit-authenticator = "*"
+bcrypt = "*"
 
 [dev-packages]
