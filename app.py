@@ -21,15 +21,16 @@ from app.dataset import JOB_SKILLS
 import streamlit_authenticator as stauth
 import logging
 
+logging.basicConfig(level=logging.INFO)
 # Set up the page title and layout
 st.set_page_config(
     page_title="Resume Parser", layout="wide", initial_sidebar_state="expanded"
 )
 
 # User Authentication
-names = ["John Doe", "Jane Doe"]
-usernames = ["johndoe", "janedoe"]
-passwords = ["password123", "password456"]
+names = ["John Doe", "Jane Doe", "Admin User"]
+usernames = ["johndoe", "janedoe", "admin"]
+passwords = ["password123", "password456", "adminpassword"]
 
 hashed_passwords = [
     bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
@@ -55,6 +56,62 @@ fields = {
     "Login": "Login",
 }
 name, authentication_status, username = authenticator.login("main", fields=fields)
+
+
+# Sidebar content visible to all users
+def set_sidebar() -> None:
+    with st.sidebar:
+        st.header("📄 About the Resume Parser")
+        st.write(
+            """
+            Welcome to the Resume Parser app! This tool helps you analyze and categorize resumes based on their content.
+            
+            This parser focuses in Tech related resumes for the following job types:
+            
+            - Backend Developer
+            - Cloud Engineer
+            - Data Scientist
+            - Frontend Developer
+            - Full Stack Developer
+            - Machine Learning Engineer
+            - Mobile App Developer (iOS/Android)
+            - Python Developer
+             
+
+            **Highlights**:
+
+            - **Upload and Analyze**: Upload your resume in PDF format and get detailed insights.
+            - **Interactive Visuals**: Explore word clouds, skill distributions, and more.
+            - **Machine Learning**: Leverages advanced machine learning models for accurate predictions.
+
+            **Login Instructions**:
+            - Username: johndoe
+            - Password: password123
+            """
+        )
+        st.divider()
+
+        st.header("👨‍💻 About the Author")
+        st.write(
+            """
+            Leo is a software engineer based in NYC with a background in computer science from WGU. Working in tech, Leo is dedicated to contributing to innovative projects while pursuing the goal of starting his own business in the tech industry. Passionate about programming and technology trends, Leo enjoys engaging with the tech community to share insights and discuss code.
+
+            Connect and say hi!
+            """
+        )
+
+        st.divider()
+        st.subheader("🔗 Connect with Me", anchor=False)
+        st.markdown(
+            """
+            - [🐙 Source Code](https://github.com/amnotme/Resume_Parser)
+            - [👔 LinkedIn](https://www.linkedin.com/in/leopoldo-hernandez/)
+            """
+        )
+
+        st.divider()
+        st.write("Made with ♥, powered by Streamlit")
+
 
 if authentication_status:
     st.sidebar.write(f"Welcome {name}!")
@@ -118,13 +175,17 @@ if authentication_status:
             estimators=base_learners, final_estimator=meta_learner, cv=5
         )
         stacked_model.fit(X_train_resampled, y_train_resampled)
+        logging.info("Model training completed")
+        logging.info("Saving trained model and vectorizer")
 
         with open("app/trained_models/stacked_model.pkl", "wb") as model_file:
             pickle.dump(stacked_model, model_file)
         with open("app/trained_models/vectorizer.pkl", "wb") as vectorizer_file:
             pickle.dump(vectorizer, vectorizer_file)
 
+        logging.info("Model and vectorizer saved successfully")
         predictions = stacked_model.predict(X_test_tfidf)
+        logging.info("Model prediction completed")
         report = classification_report(y_test, predictions, zero_division=0)
         st.write(report)
         st.write(confusion_matrix(y_test, predictions))
@@ -159,12 +220,19 @@ if authentication_status:
         }
         return recommendations.get(prediction, "No specific recommendations available.")
 
-    # Streamlit interface
-    st.title("Resume Parser")
+    # Pie Chart for Skill Distribution
+    def skill_distribution_pie_chart(skills_df):
+        skills_count = skills_df["Job Category"].value_counts()
+        fig, ax = plt.subplots()
+        ax.pie(
+            skills_count, labels=skills_count.index, autopct="%1.1f%%", startangle=90
+        )
+        ax.axis("equal")
+        return fig
 
     # Upload Resume Section
-    st.header("Upload New File")
-    uploaded_file = st.file_uploader("Choose a file", type=["pdf", "txt"])
+    st.header("Upload Your Resume")
+    uploaded_file = st.file_uploader("Choose a file", type=["pdf"])
 
     if uploaded_file is not None:
         st.session_state.uploaded_file = uploaded_file
@@ -210,7 +278,7 @@ if authentication_status:
         st.subheader(f"Top Skills for **{prediction}**")
         st.markdown(", ".join(top_skills))
 
-        # Improved Bar chart for top skills comparison
+        # Bar chart for top skills comparison
         st.subheader("Top Skills Comparison")
         skills_data = {"Job Category": [], "Skill": []}
         for category in JOB_SKILLS.keys():
@@ -235,6 +303,10 @@ if authentication_status:
         )
         ax.set_title("Top Skills Comparison Across Job Categories")
         st.pyplot(fig)
+
+        st.subheader("Skill Distribution Across Job Categories")
+        pie_chart = skill_distribution_pie_chart(skills_df)
+        st.pyplot(pie_chart)
 
         # Display top skills for other job categories
         with st.expander("Compare with Other Job Categories"):
@@ -270,8 +342,15 @@ if authentication_status:
             st.session_state.uploaded_file = uploaded_file
             st.experimental_rerun()
 
-        # Train Model Section
-        st.sidebar.header("Train Model")
+    # Train Model Section
+    st.sidebar.header("Admin Section")
+    if username == "admin":
         if st.sidebar.button("Train Model"):
             train_stacked_classifier()
             st.success("Model trained successfully!")
+        else:
+            st.sidebar.write("Training is available for admins only.")
+else:
+    st.warning("Please login to access the application.")
+
+set_sidebar()  # Set the sidebar content
