@@ -2,6 +2,7 @@ import spacy
 from os import getenv
 from app.utilities.utils import clean_text, extract_text_from_pdf, save_text_to_file
 from app.dataset import JOB_SKILLS
+from app.utilities import download_and_load_spacy_model
 
 data_dir = getenv("RESUME_DATA_FOLDER", "tmp1")
 output_dir_train = getenv("TRAINED_DATA_FOLDER", "tmp2")
@@ -10,7 +11,7 @@ output_dir_uploaded = getenv("UPLOAD_FOLDER", "tmp4")
 
 
 def _load_custom_ner():
-    nlp = spacy.load("en_core_web_sm")
+    nlp = download_and_load_spacy_model()
     ruler = nlp.add_pipe("entity_ruler", before="ner")
 
     patterns = [
