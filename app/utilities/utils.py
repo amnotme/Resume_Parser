@@ -1,6 +1,4 @@
-import re
 import PyPDF2
-import spacy
 from app.dataset import JOB_SKILLS
 import uuid
 import os
