@@ -87,12 +87,15 @@ def descriptive_analysis(text):
     unique_words = len(set(text.split()))
     return word_count, unique_words
 
+
 # Generate Word Cloud
 def generate_wordcloud(text):
-    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
+    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(
+        text
+    )
     plt.figure(figsize=(10, 5))
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis('off')
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis("off")
     return plt
 
 
@@ -144,10 +147,7 @@ if uploaded_file is not None:
 
     # Bar chart for top skills comparison
     st.subheader("Top Skills Comparison")
-    skills_data = {
-        "Job Category": [],
-        "Skill": []
-    }
+    skills_data = {"Job Category": [], "Skill": []}
     for category in JOB_SKILLS.keys():
         other_top_skills = extract_top_skills(preprocessed_text, category)
         skills_data["Job Category"].extend([category] * len(other_top_skills))
