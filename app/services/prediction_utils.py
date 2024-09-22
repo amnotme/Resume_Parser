@@ -1,6 +1,6 @@
-import pickle
 import os
 import streamlit as st
+import fickling
 
 
 @st.cache_resource
@@ -9,11 +9,11 @@ def _load_model_and_vectorizer():
         os.getenv("TRAINED_MODELS_PATH", "app/trained_models/") + "stacked_model.pkl",
         "rb",
     ) as model_file:
-        model = pickle.load(model_file)
+        model = fickling.load(model_file)
     with open(
         os.getenv("TRAINED_MODELS_PATH", "app/trained_models/") + "vectorizer.pkl", "rb"
     ) as vectorizer_file:
-        vectorizer = pickle.load(vectorizer_file)
+        vectorizer = fickling.load(vectorizer_file)
     return model, vectorizer
 
 
