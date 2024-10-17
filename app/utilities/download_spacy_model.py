@@ -1,6 +1,7 @@
 import subprocess
 import spacy
 import os
+from security import safe_command
 
 
 def download_and_load_spacy_model():
@@ -11,8 +12,7 @@ def download_and_load_spacy_model():
     except OSError:
         # If the model is not found, download it
         print(f"Downloading {model_name} model...")
-        subprocess.run(
-            [os.sys.executable, "-m", "spacy", "download", model_name], check=True
+        safe_command.run(subprocess.run, [os.sys.executable, "-m", "spacy", "download", model_name], check=True
         )
         nlp = spacy.load(model_name)
     return nlp
